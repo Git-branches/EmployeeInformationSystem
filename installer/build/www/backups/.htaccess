@@ -1,0 +1,2 @@
+# Block all direct web access to backup files (downloads go through the app)
+Require all denied

@@ -1,0 +1,44 @@
+EMPLOYEE INFORMATION SYSTEM - TERMS OF USE
+BSIT Capstone Project | Jollibee Tupi
+
+1. PURPOSE
+   This software was developed as an academic capstone project for the
+   management of employee records at Jollibee Tupi, National Highway,
+   Brgy. Poblacion, Tupi. It is provided for the use of the authorised
+   administrators of that establishment and for academic evaluation.
+
+2. DATA PRIVACY
+   The system stores personal information of employees and applicants.
+   The operator is responsible for handling this data in accordance with
+   the Data Privacy Act of 2012 (Republic Act No. 10173), including:
+     - collecting only information needed for employment purposes;
+     - keeping the computer and the administrator password secure;
+     - not sharing employee records with unauthorised persons;
+     - keeping backups in a safe location.
+
+3. BUNDLED SOFTWARE
+   This installer includes third-party components distributed under their
+   own licences:
+     - Apache HTTP Server        - Apache License 2.0
+     - PHP                       - PHP License 3.01
+     - MariaDB / MySQL           - GNU General Public License v2
+     - Bootstrap, Bootstrap Icons- MIT License
+     - PhpSpreadsheet            - MIT License
+     - Dompdf                    - LGPL 2.1
+     - smalot/pdfparser          - LGPL 3.0
+     - Google API Client for PHP - Apache License 2.0
+   Each component remains the property of its respective authors and is
+   used in accordance with the terms above.
+
+4. NO WARRANTY
+   The software is provided "as is", without warranty of any kind. The
+   developers are not liable for data loss or damages arising from its use.
+   Regular backups are the responsibility of the operator.
+
+5. TRADEMARKS
+   "Jollibee" and the Jollibee logo are trademarks of Jollibee Foods
+   Corporation, used here only to identify the establishment for which
+   this academic project was prepared. This software is not an official
+   Jollibee Foods Corporation product.
+
+By continuing with this installation you acknowledge these terms.

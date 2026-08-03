@@ -1,0 +1,4 @@
+# Uploaded files may be viewed, but never executed as scripts
+<FilesMatch "\.(php|phtml|php\d)$">
+    Require all denied
+</FilesMatch>
