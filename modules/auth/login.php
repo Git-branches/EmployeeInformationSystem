@@ -53,16 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
 </head>
 <body>
-<?php $has_bg = is_file(ROOT_PATH . '/assets/img/building.jpg'); ?>
-<div class="login-page<?= $has_bg ? ' has-photo' : '' ?>"<?= $has_bg ? ' style="--login-bg:url(\'' . BASE_URL . '/assets/img/building.jpg\')"' : '' ?>>
+<div class="login-page">
     <div class="card shadow login-card">
         <div class="card-body p-4">
             <div class="text-center mb-4">
-                <?php if (is_file(ROOT_PATH . '/assets/img/logo.png')): ?>
-                    <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Jollibee" height="110" class="mb-2">
-                <?php else: ?>
-                    <span class="brand-bee">🐝</span>
-                <?php endif; ?>
+                <span class="brand-mark">EIS</span>
                 <h1 class="h4 mt-2 mb-0"><?= e(APP_NAME) ?></h1>
             </div>
             <?php if ($error): ?>

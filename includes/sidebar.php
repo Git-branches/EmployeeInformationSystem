@@ -17,7 +17,7 @@ $menu = [
 ?>
 <aside class="sidebar offcanvas-lg offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarMenu" aria-label="Main menu">
     <div class="offcanvas-header d-lg-none">
-        <span class="offcanvas-title fw-bold"><span class="brand-bee">🐝</span>Menu</span>
+        <span class="offcanvas-title fw-bold d-flex align-items-center"><span class="brand-mark">EIS</span>Menu</span>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-block p-3">

@@ -1,9 +1,10 @@
-/* assets/css/style.css — Jollibee-inspired theme over Bootstrap
-   Brand palette: Jollibee red, sunshine yellow, cream, warm brown. */
+/* assets/css/style.css — Employee Information System theme
+   Own visual identity: teal primary, amber accent.
+   Tuned for long data-entry sessions:
+     - off-white surfaces instead of pure white (less glare)
+     - dark grey text instead of pure black (softer contrast)
+     - the accent colour is used sparingly, only to mark state */
 
-/* font-display: block (not swap) so text is never painted in a fallback font
-   first and then re-rendered — that caused a visible big/small flash on every
-   page load. The font is local and preloaded, so it is ready immediately. */
 @font-face {
     font-family: 'Baloo 2';
     font-style: normal;
@@ -13,35 +14,33 @@
 }
 
 :root {
-    --jb-red: #e4002b;
-    --jb-red-dark: #b0001f;
-    --jb-maroon: #7d0e20;
-    --jb-maroon-dark: #5e0a17;
-    --jb-yellow: #ffc522;
-    --jb-yellow-dark: #f0ae00;
-    --jb-cream: #fff8ec;
-    --jb-brown: #4a2c17;
+    --eis-primary: #0f766e;        /* teal 700  - navbar, buttons */
+    --eis-primary-dark: #0b5a54;   /* teal 800  - hover */
+    --eis-deep: #134e4a;           /* teal 900  - sidebar top */
+    --eis-deep-dark: #0c3a37;      /* sidebar bottom */
+    --eis-accent: #f59e0b;         /* amber 500 - active state */
+    --eis-accent-dark: #d97706;
+    --eis-surface: #f6f8f9;        /* page background */
+    --eis-card: #ffffff;
+    --eis-line: #e4eaec;
+    --eis-text: #1f2937;           /* grey 800, not pure black */
+    --eis-muted: #64748b;
 }
 
 /* Reserve the scrollbar space always, so switching between short and long
-   pages does not shift the layout sideways. overflow-y keeps the same
-   behaviour on browsers without scrollbar-gutter support. */
+   pages does not shift the layout sideways. */
 html {
     overflow-y: scroll;
     scrollbar-gutter: stable;
 }
 
 /* The scrollbar space is already reserved above, so Bootstrap must not add
-   its own compensation padding when the mobile menu drawer opens
-   (that padding shifted the whole page sideways). */
+   its own compensation padding when the mobile menu drawer opens. */
 body {
     padding-right: 0 !important;
-}
-
-body {
-    background-color: var(--jb-cream);
+    background-color: var(--eis-surface);
     min-height: 100vh;
-    color: #333;
+    color: var(--eis-text);
 }
 
 .min-w-0 { min-width: 0; }
@@ -51,68 +50,81 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
     font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
 }
 
-h1 i, .h3 i { color: var(--jb-red); }
+h1 i, .h3 i { color: var(--eis-primary); }
 
-/* ---- Brand color overrides (red family) ---- */
-.bg-danger { background-color: var(--jb-red) !important; }
-.text-danger { color: var(--jb-red) !important; }
-.text-bg-danger { background-color: var(--jb-red) !important; color: #fff !important; }
+/* ---- Brand colour overrides -------------------------------------------
+   Bootstrap's "danger" utilities are remapped to the brand teal so the
+   existing markup needs no changes, while real warnings stay red.        */
+.bg-danger        { background-color: var(--eis-primary) !important; }
+.text-danger      { color: var(--eis-primary) !important; }
+.text-bg-danger   { background-color: var(--eis-primary) !important; color: #fff !important; }
 
 .btn-danger {
-    background-color: var(--jb-red);
-    border-color: var(--jb-red);
+    background-color: var(--eis-primary);
+    border-color: var(--eis-primary);
 }
 .btn-danger:hover, .btn-danger:focus, .btn-danger:active {
-    background-color: var(--jb-red-dark) !important;
-    border-color: var(--jb-red-dark) !important;
+    background-color: var(--eis-primary-dark) !important;
+    border-color: var(--eis-primary-dark) !important;
 }
-.btn-outline-danger { color: var(--jb-red); border-color: var(--jb-red); }
+.btn-outline-danger { color: var(--eis-primary); border-color: var(--eis-primary); }
 .btn-outline-danger:hover, .btn-outline-danger.active {
-    background-color: var(--jb-red) !important;
-    border-color: var(--jb-red) !important;
+    background-color: var(--eis-primary) !important;
+    border-color: var(--eis-primary) !important;
     color: #fff !important;
 }
 
-/* ---- Yellow accents ---- */
-.text-bg-warning, .bg-warning {
-    background-color: var(--jb-yellow) !important;
-    color: var(--jb-brown) !important;
+/* Genuine alerts keep a real red so warnings still read as warnings */
+.alert-danger {
+    background-color: #fdeaea;
+    border-color: #f5c2c2;
+    color: #8a1f1f;
 }
-.progress-bar.bg-warning { color: var(--jb-brown); }
+.progress-bar.bg-danger { background-color: #dc3545 !important; }
 
-/* ---- Navbar ---- */
-nav.navbar {
-    background-color: var(--jb-red) !important;
-    border-bottom: 4px solid var(--jb-yellow);
-    box-shadow: 0 2px 10px rgba(125, 14, 32, .25);
+/* ---- Accent ---------------------------------------------------------- */
+.text-bg-warning, .bg-warning {
+    background-color: var(--eis-accent) !important;
+    color: #422006 !important;
 }
-.navbar-brand { font-weight: 700; letter-spacing: .3px; display: inline-flex; align-items: center; }
-.navbar-logo {
-    background: #fff;
-    border-radius: .7rem;
-    padding: 3px 10px;
-    margin-right: .65rem;
+
+/* ---- Navbar ---------------------------------------------------------- */
+nav.navbar {
+    background-color: var(--eis-primary) !important;
+    border-bottom: 3px solid var(--eis-accent);
+    box-shadow: 0 1px 6px rgba(15, 118, 110, .25);
+}
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: .3px;
     display: inline-flex;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
-}
-.brand-bee {
-    display: inline-block;
-    background: var(--jb-yellow);
-    border-radius: 50%;
-    width: 34px;
-    height: 34px;
-    line-height: 34px;
-    text-align: center;
-    font-size: 1.05rem;
-    margin-right: .5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
 }
 
-/* ---- Sidebar (desktop: fixed column; mobile: offcanvas drawer) ---- */
+/* Monogram brand mark — drawn in CSS, no image file needed */
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-right: .6rem;
+    border-radius: .6rem;
+    background: #fff;
+    color: var(--eis-primary);
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: .95rem;
+    letter-spacing: .5px;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    flex-shrink: 0;
+}
+
+/* ---- Sidebar (desktop: fixed column; mobile: offcanvas drawer) -------- */
 .sidebar {
     --bs-offcanvas-width: 260px;
-    background: linear-gradient(180deg, var(--jb-maroon) 0%, var(--jb-maroon-dark) 100%) !important;
+    background: linear-gradient(180deg, var(--eis-deep) 0%, var(--eis-deep-dark) 100%) !important;
 }
 @media (min-width: 992px) {
     .sidebar {
@@ -121,18 +133,16 @@ nav.navbar {
         flex-shrink: 0;
     }
 }
-.sidebar .offcanvas-header {
-    border-bottom: 3px solid var(--jb-yellow);
+.sidebar .offcanvas-header { border-bottom: 3px solid var(--eis-accent); }
+.sidebar .offcanvas-title .brand-mark {
+    width: 30px;
+    height: 30px;
+    font-size: .75rem;
+    margin-right: .5rem;
 }
-.sidebar .offcanvas-title .brand-bee {
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    font-size: .9rem;
-}
+
 /* Every menu item keeps the SAME font weight and size in all states — the
-   active item is marked by color only. Changing weight on the active item
-   made its text visibly grow/shrink while navigating. */
+   active item is marked by colour only, so nothing resizes while navigating. */
 .sidebar .nav-link {
     border-radius: 50rem;
     padding: .55rem 1rem;
@@ -140,155 +150,121 @@ nav.navbar {
     white-space: nowrap;
 }
 .sidebar .nav-link:hover:not(.active) {
-    background-color: rgba(255, 197, 34, .18);
+    background-color: rgba(245, 158, 11, .16);
 }
 .sidebar .nav-link.active {
-    background-color: var(--jb-yellow) !important;
-    color: var(--jb-brown) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    background-color: var(--eis-accent) !important;
+    color: #422006 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .28);
 }
-.sidebar .nav-link.active i { color: var(--jb-brown); }
+.sidebar .nav-link.active i { color: #422006; }
 
-/* ---- Cards, tables, forms ---- */
+/* ---- Cards, tables, forms -------------------------------------------- */
 .card {
     border: none;
-    border-radius: 1rem;
+    border-radius: .85rem;
     overflow: hidden;
-    box-shadow: 0 3px 12px rgba(125, 14, 32, .08);
+    background-color: var(--eis-card);
+    box-shadow: 0 2px 8px rgba(19, 78, 74, .07);
 }
 .card-header {
-    background-color: #fff !important;
-    border-bottom: 3px solid var(--jb-yellow);
+    background-color: var(--eis-card) !important;
+    border-bottom: 2px solid var(--eis-accent);
     font-weight: 600;
 }
+.table {
+    --bs-table-color: var(--eis-text);
+    border-color: var(--eis-line);
+}
 .table-light, .table thead.table-light th {
-    --bs-table-bg: #fff3d6;
-    color: var(--jb-brown);
+    --bs-table-bg: #eef4f4;
+    color: #134e4a;
+}
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: #f0f7f6;
 }
 .btn { border-radius: 50rem; }
-.form-control, .form-select { border-radius: .65rem; }
+.form-control, .form-select { border-radius: .55rem; border-color: #d5dee0; }
 .form-control:focus, .form-select:focus {
-    border-color: var(--jb-red);
-    box-shadow: 0 0 0 .2rem rgba(228, 0, 43, .15);
+    border-color: var(--eis-primary);
+    box-shadow: 0 0 0 .2rem rgba(15, 118, 110, .15);
+}
+.form-check-input:checked {
+    background-color: var(--eis-primary);
+    border-color: var(--eis-primary);
 }
 .badge { border-radius: 50rem; }
-.progress { border-radius: 50rem; background-color: #f3e5cf; }
+.progress { border-radius: 50rem; background-color: #e3eaec; }
+.progress-bar.bg-success { background-color: #0f766e !important; }
 
-/* ---- Login page ---- */
+/* ---- Login page ------------------------------------------------------ */
 .login-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
     background:
-        radial-gradient(circle at 20% 20%, rgba(255, 197, 34, .25) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(255, 197, 34, .18) 0%, transparent 45%),
-        linear-gradient(135deg, var(--jb-red) 0%, var(--jb-maroon-dark) 100%);
-}
-/* Blurred storefront photo background (assets/img/building.jpg) */
-.login-page.has-photo {
-    position: relative;
-    overflow: hidden;
-}
-.login-page.has-photo::before {
-    content: "";
-    position: absolute;
-    inset: -24px;                      /* oversize so blur edges never show */
-    background: var(--login-bg) center / cover no-repeat;
-    filter: blur(7px) brightness(.65);
-    z-index: 0;
-}
-.login-page.has-photo::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(228, 0, 43, .45) 0%, rgba(94, 10, 23, .55) 100%);
-    z-index: 0;
+        radial-gradient(circle at 18% 22%, rgba(245, 158, 11, .18) 0%, transparent 42%),
+        radial-gradient(circle at 82% 78%, rgba(45, 212, 191, .16) 0%, transparent 45%),
+        linear-gradient(135deg, var(--eis-primary) 0%, var(--eis-deep-dark) 100%);
 }
 .login-card {
     width: 100%;
     max-width: 400px;
-    border-radius: 1.25rem;
-    border-top: 6px solid var(--jb-yellow);
+    border-radius: 1rem;
+    border-top: 5px solid var(--eis-accent);
     position: relative;
     z-index: 1;
 }
-.login-card .brand-bee {
-    width: 64px;
-    height: 64px;
-    line-height: 64px;
-    font-size: 2rem;
-    margin: 0 0 .5rem;
+.login-card .brand-mark {
+    width: 68px;
+    height: 68px;
+    border-radius: 1rem;
+    font-size: 1.5rem;
+    margin: 0 0 .25rem;
+    background: var(--eis-primary);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(15, 118, 110, .3);
 }
 
-/* ---- Mobile / tablet responsiveness ---- */
+/* ---- Mobile / tablet responsiveness ---------------------------------- */
 @media (max-width: 991.98px) {
     main {
         padding: 1rem !important;
         max-width: 100vw;
         overflow-x: hidden;
     }
-
-    /* Page headers and action-button rows wrap instead of overflowing */
     main > .d-flex.justify-content-between {
         flex-wrap: wrap;
         gap: .5rem;
     }
-    main > .d-flex.justify-content-between .h3 {
-        font-size: 1.25rem;
-    }
+    main > .d-flex.justify-content-between .h3 { font-size: 1.25rem; }
 
-    /* Tables: slightly smaller text, keep horizontal scroll smooth */
-    .table {
-        font-size: .85rem;
-    }
-    .table-responsive {
-        -webkit-overflow-scrolling: touch;
-    }
+    .table { font-size: .85rem; }
+    .table-responsive { -webkit-overflow-scrolling: touch; }
 
-    /* Cards and stat tiles */
-    .card-body {
-        padding: 1rem;
-    }
-    .fs-2.fw-bold {
-        font-size: 1.5rem !important;
-    }
+    .card-body { padding: 1rem; }
+    .fs-2.fw-bold { font-size: 1.5rem !important; }
 
-    /* Notification dropdown fits small screens */
     #notif-menu {
         min-width: 0 !important;
         width: min(320px, 92vw);
     }
-
-    /* Login page breathing room on small phones */
-    .login-page {
-        padding: 1rem;
-    }
-    .login-card .brand-bee {
-        width: 52px;
-        height: 52px;
-        line-height: 52px;
-        font-size: 1.6rem;
-    }
 }
 
 @media (max-width: 575.98px) {
-    /* Stack header action buttons full-width on phones */
     main > .d-flex.justify-content-between > div:last-child {
         display: flex;
         flex-wrap: wrap;
         gap: .4rem;
         width: 100%;
     }
-    main > .d-flex.justify-content-between > div:last-child .btn {
-        flex: 1 1 auto;
-    }
-    .table {
-        font-size: .8rem;
-    }
+    main > .d-flex.justify-content-between > div:last-child .btn { flex: 1 1 auto; }
+    .table { font-size: .8rem; }
 }
 
-/* ---- Print ---- */
+/* ---- Print ----------------------------------------------------------- */
 @media print {
     body { background: #fff; }
     .sidebar, nav.navbar, .btn, .alert, form.card { display: none !important; }

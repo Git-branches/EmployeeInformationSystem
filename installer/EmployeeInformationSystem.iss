@@ -1,6 +1,5 @@
 ; ============================================================================
 ;  Employee Information System - Inno Setup script
-;  Jollibee Tupi | Capstone Project
 ;
 ;  Builds: EmployeeInformationSystem_Setup.exe
 ;
@@ -16,8 +15,10 @@
 #define AppName        "Employee Information System"
 #define AppShortName   "EIS"
 #define AppVersion     "1.0.0"
-#define AppPublisher   "Ligero - BSIT Capstone Project"
+#define Developer      "Rhon Jon G. Romero"
+#define AppPublisher   Developer
 #define AppCompany     "Jollibee Tupi"
+#define AppYear        "2026"
 #define AppURL         "http://localhost:8080/"
 #define AppExe         "eis-launch.vbs"
 #define BuildDir       "build"
@@ -29,6 +30,14 @@ AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppPublisher}
 AppComments=Centralized employee records, requirements monitoring and reporting for {#AppCompany}
+AppCopyright=Copyright (C) {#AppYear} {#Developer}
+; Shown under right-click > Properties > Details on the setup file itself
+VersionInfoVersion={#AppVersion}
+VersionInfoCompany={#Developer}
+VersionInfoDescription={#AppName} Setup
+VersionInfoCopyright=Copyright (C) {#AppYear} {#Developer}
+VersionInfoProductName={#AppName}
+VersionInfoProductVersion={#AppVersion}
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
@@ -71,9 +80,14 @@ Source: "{#BuildDir}\stack\*"; DestDir: "{app}\stack"; Flags: ignoreversion recu
 Source: "{#BuildDir}\scripts\*"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ---- Configuration templates (patched with the real path after install) ---
-Source: "templates\httpd.conf"; DestDir: "{app}\stack\apache\conf"; Flags: ignoreversion
-Source: "templates\php.ini";    DestDir: "{app}\stack\php";         Flags: ignoreversion
-Source: "templates\my.ini";     DestDir: "{app}\stack\mariadb";     Flags: ignoreversion
+; Each config is patched with the real install path immediately after it is
+; copied (AfterInstall), because the database setup in [Run] executes before
+; the ssPostInstall step and needs the paths to be correct already.
+Source: "templates\httpd.conf"; DestDir: "{app}\stack\apache\conf"; Flags: ignoreversion; AfterInstall: PatchApacheConf
+; php.ini.generated is produced by build.ps1 and carries the extension list
+; that matches the PHP build actually bundled in stack\php.
+Source: "templates\php.ini.generated"; DestDir: "{app}\stack\php"; DestName: "php.ini"; Flags: ignoreversion; AfterInstall: PatchPhpIni
+Source: "templates\my.ini";     DestDir: "{app}\stack\mariadb";     Flags: ignoreversion; AfterInstall: PatchMyIni
 
 ; ---- Branding and docs ----------------------------------------------------
 Source: "eis.ico";          DestDir: "{app}"; Flags: ignoreversion
@@ -92,12 +106,16 @@ Name: "{app}\www\backups";                  Permissions: users-modify
 Name: "{app}\www\config";                   Permissions: users-modify
 
 [Icons]
-; Main shortcut - launches services then opens the browser
-Name: "{group}\{#AppName}";        Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Comment: "Open the {#AppName}"; Tasks: startmenu
+; Main shortcut. wscript.exe is named explicitly (rather than letting Windows
+; pick the .vbs handler) so the launcher always runs windowless, whatever the
+; user's file associations happen to be.
+Name: "{group}\{#AppName}";        Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#AppExe}"""; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Comment: "Open the {#AppName}"; Tasks: startmenu
 Name: "{group}\Stop {#AppShortName} Services"; Filename: "{app}\eis-stop.bat"; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Comment: "Shut down Apache and the database"; Tasks: startmenu
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"; Tasks: startmenu
-Name: "{autodesktop}\{#AppName}";  Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Comment: "Open the {#AppName}"; Tasks: desktopicon
-Name: "{userstartup}\{#AppName}";  Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Tasks: startupicon
+Name: "{autodesktop}\{#AppName}";  Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#AppExe}"""; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Comment: "Open the {#AppName}"; Tasks: desktopicon
+; commonstartup (not userstartup) - the installer runs elevated, and the
+; system should come up for whoever logs in on this computer.
+Name: "{commonstartup}\{#AppName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#AppExe}"""; WorkingDir: "{app}"; IconFilename: "{app}\eis.ico"; Tasks: startupicon
 
 [Run]
 ; 1. Prepare and import the database (visible so the user sees progress)
@@ -106,8 +124,8 @@ Filename: "{cmd}"; Parameters: "/C ""{app}\eis-dbsetup.bat"""; WorkingDir: "{app
 ; 2. Optional firewall rules
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName} (HTTP 8080)"" dir=in action=allow protocol=TCP localport=8080"; Flags: runhidden waituntilterminated; Tasks: firewall
 
-; 3. Launch the system when the wizard finishes
-Filename: "{app}\{#AppExe}"; Description: "Launch the {#AppName} now"; WorkingDir: "{app}"; Flags: postinstall shellexec nowait skipifsilent
+; 3. Launch the system when the wizard finishes (windowless, via wscript)
+Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#AppExe}"""; Description: "Launch the {#AppName} now"; WorkingDir: "{app}"; Flags: postinstall nowait skipifsilent
 
 [UninstallRun]
 ; Stop Apache and MariaDB before files are removed
@@ -127,18 +145,36 @@ var
 
 { ---------------------------------------------------------------- helpers }
 
-{ Replace the {#APPDIR#} placeholder inside a config file with the real path
+{ Replace the @@APPDIR@@ placeholder inside a config file with the real path
   (forward slashes - Apache, PHP and MariaDB all accept them on Windows). }
 procedure PatchConfig(const FileName: string);
 var
+  Raw: AnsiString;
   Content, AppPath: string;
 begin
-  if not LoadStringFromFile(FileName, Content) then
+  if not LoadStringFromFile(FileName, Raw) then
     Exit;
+  Content := String(Raw);
   AppPath := ExpandConstant('{app}');
   StringChangeEx(AppPath, '\', '/', True);
-  StringChangeEx(Content, '{#'+'APPDIR#}', AppPath, True);
-  SaveStringToFile(FileName, Content, False);
+  StringChangeEx(Content, '@@APPDIR@@', AppPath, True);
+  SaveStringToFile(FileName, AnsiString(Content), False);
+end;
+
+{ AfterInstall hooks — run the moment each config file lands on disk. }
+procedure PatchApacheConf;
+begin
+  PatchConfig(ExpandConstant('{app}\stack\apache\conf\httpd.conf'));
+end;
+
+procedure PatchPhpIni;
+begin
+  PatchConfig(ExpandConstant('{app}\stack\php\php.ini'));
+end;
+
+procedure PatchMyIni;
+begin
+  PatchConfig(ExpandConstant('{app}\stack\mariadb\my.ini'));
 end;
 
 { Write config/local.php so the application talks to the bundled MariaDB. }
@@ -155,15 +191,15 @@ begin
        '    ''user'' => ''root'',' + #13#10 +
        '    ''pass'' => '''',' + #13#10 +
        '];' + #13#10;
-  SaveStringToFile(ExpandConstant('{app}\www\config\local.php'), S, False);
+  SaveStringToFile(ExpandConstant('{app}\www\config\local.php'), AnsiString(S), False);
 end;
 
 { True when something already listens on the given TCP port. }
 function PortInUse(Port: string): Boolean;
 var
   ResultCode: Integer;
-  TempFile, Output: AnsiString;
-  Content: string;
+  TempFile, Content: string;
+  Output: AnsiString;
 begin
   Result := False;
   TempFile := ExpandConstant('{tmp}\portcheck.txt');
@@ -172,7 +208,7 @@ begin
   begin
     if LoadStringFromFile(TempFile, Output) then
     begin
-      Content := Output;
+      Content := String(Output);
       Result := Pos(':' + Port, Content) > 0;
     end;
     DeleteFile(TempFile);
@@ -181,8 +217,21 @@ end;
 
 { ------------------------------------------------------------ wizard flow }
 
+{ Developer credit on the welcome and finished pages of the wizard. }
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpFinished then
+    WizardForm.FinishedLabel.Caption :=
+      WizardForm.FinishedLabel.Caption + #13#10#13#10 +
+      '{#AppName} {#AppVersion}' + #13#10 +
+      'Developed by {#Developer}';
+end;
+
 procedure InitializeWizard;
 begin
+  { A quiet credit line at the bottom of every wizard page }
+  WizardForm.BeveledLabel.Caption := '  {#AppName} {#AppVersion}  ·  Developed by {#Developer}  ';
+
   DataPage := CreateInputOptionPage(wpSelectTasks,
     'Existing data', 'What should happen to employee records if you uninstall?',
     'Choose how the uninstaller treats the database and uploaded files.',
@@ -208,14 +257,11 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
+  { The three service configs are patched by their AfterInstall hooks, which
+    fire before the database setup in [Run]. Only the application's own
+    database pointer is left to write here. }
   if CurStep = ssPostInstall then
-  begin
-    { Bake the install path into the three service configs }
-    PatchConfig(ExpandConstant('{app}\stack\apache\conf\httpd.conf'));
-    PatchConfig(ExpandConstant('{app}\stack\php\php.ini'));
-    PatchConfig(ExpandConstant('{app}\stack\mariadb\my.ini'));
     WriteLocalDbConfig;
-  end;
 end;
 
 { ------------------------------------------------------------- uninstall }

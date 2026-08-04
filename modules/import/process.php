@@ -18,11 +18,25 @@ $rows = $import['rows'];
 
 $dept_lookup = $pdo->prepare('SELECT department_id FROM departments WHERE LOWER(department_name) = LOWER(?)');
 $dept_insert = $pdo->prepare('INSERT INTO departments (department_name) VALUES (?)');
-$emp_insert  = $pdo->prepare(
-    'INSERT INTO employees (employee_no, first_name, middle_name, last_name, birthdate, sex,
-     contact_no, email, address, department_id, position, applicant_type, employment_status, date_hired)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+
+// Columns filled from an imported row, in the order used below.
+$import_columns = [
+    'employee_no', 'first_name', 'middle_name', 'last_name', 'birthdate', 'birthplace',
+    'sex', 'civil_status', 'blood_type', 'height_cm', 'weight_kg',
+    'contact_no', 'email', 'address',
+    'sss_no', 'philhealth_no', 'pagibig_no', 'tin_no',
+    'is_solo_parent', 'is_ip', 'is_pwd', 'is_smoker',
+    'elig_professional', 'elig_sub_professional', 'elig_ra1080',
+    'emergency_contact_name', 'emergency_contact_no',
+    'department_id', 'position', 'applicant_type', 'employment_status', 'date_hired',
+];
+$emp_insert = $pdo->prepare(
+    'INSERT INTO employees (' . implode(',', $import_columns) . ') VALUES ('
+    . implode(',', array_fill(0, count($import_columns), '?')) . ')'
 );
+
+/** Blank strings become NULL; anything else is trimmed. */
+$val = fn(array $row, string $key) => trim((string)($row[$key] ?? '')) ?: null;
 
 $imported = 0;
 $skipped  = 0;
@@ -52,15 +66,33 @@ try {
         $emp_insert->execute([
             $row['employee_no'],
             $row['first_name'],
-            trim((string)($row['middle_name'] ?? '')) ?: null,
+            $val($row, 'middle_name'),
             $row['last_name'],
             $row['birthdate'],
+            $val($row, 'birthplace'),
             $row['sex'],
-            trim((string)($row['contact_no'] ?? '')) ?: null,
-            trim((string)($row['email'] ?? '')) ?: null,
-            trim((string)($row['address'] ?? '')) ?: null,
+            $row['civil_status'] ?? null,
+            $row['blood_type'] ?? null,
+            $row['height_cm'] ?? null,
+            $row['weight_kg'] ?? null,
+            $val($row, 'contact_no'),
+            $val($row, 'email'),
+            $val($row, 'address'),
+            $val($row, 'sss_no'),
+            $val($row, 'philhealth_no'),
+            $val($row, 'pagibig_no'),
+            $val($row, 'tin_no'),
+            (int)($row['is_solo_parent'] ?? 0),
+            (int)($row['is_ip'] ?? 0),
+            (int)($row['is_pwd'] ?? 0),
+            (int)($row['is_smoker'] ?? 0),
+            (int)($row['elig_professional'] ?? 0),
+            (int)($row['elig_sub_professional'] ?? 0),
+            (int)($row['elig_ra1080'] ?? 0),
+            $val($row, 'emergency_contact_name'),
+            $val($row, 'emergency_contact_no'),
             $department_id,
-            trim((string)($row['position'] ?? '')) ?: null,
+            $val($row, 'position'),
             $row['applicant_type'],
             $row['employment_status'],
             $row['date_hired'],

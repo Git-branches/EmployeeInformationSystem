@@ -62,6 +62,22 @@ if (isset($_GET['form_id'])) {
     }
 
     $full_name = $emp['first_name'] . ' ' . ($emp['middle_name'] ? $emp['middle_name'] . ' ' : '') . $emp['last_name'];
+
+    // Checkbox glyphs for the printed form
+    $box = fn($on) => $on ? '&#9745;' : '&#9744;';
+    $num = fn($v, $unit) => $v !== null ? rtrim(rtrim((string)$v, '0'), '.') . ' ' . $unit : '—';
+
+    $status_rows = '';
+    foreach (['is_solo_parent' => 'Solo Parent', 'is_ip' => 'IP (Indigenous People)',
+              'is_pwd' => 'PWD (Person with Disability)', 'is_smoker' => 'Smoker'] as $k => $label) {
+        $status_rows .= '<div>' . $box(!empty($emp[$k])) . ' ' . e($label) . '</div>';
+    }
+    $elig_rows = '';
+    foreach (['elig_professional' => 'Professional (Prof.)',
+              'elig_sub_professional' => 'Sub-Professional (Sub-Prof.)',
+              'elig_ra1080' => 'RA 1080'] as $k => $label) {
+        $elig_rows .= '<div>' . $box(!empty($emp[$k])) . ' ' . e($label) . '</div>';
+    }
     $html = '
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
@@ -87,15 +103,38 @@ if (isset($_GET['form_id'])) {
             <table class="info">
                 <tr><td class="lbl">Employee No.</td><td><strong>' . e($emp['employee_no'] ?? '—') . '</strong></td></tr>
                 <tr><td class="lbl">Full Name</td><td><strong>' . e($full_name) . '</strong></td></tr>
-                <tr><td class="lbl">Birthdate</td><td>' . e(date('F j, Y', strtotime($emp['birthdate']))) . '</td></tr>
-                <tr><td class="lbl">Sex</td><td>' . e($emp['sex']) . '</td></tr>
-                <tr><td class="lbl">Contact No.</td><td>' . e($emp['contact_no'] ?? '—') . '</td></tr>
+                <tr><td class="lbl">Birthday</td><td>' . e(date('F j, Y', strtotime($emp['birthdate']))) . '</td></tr>
+                <tr><td class="lbl">Birthplace</td><td>' . e($emp['birthplace'] ?? '—') . '</td></tr>
+                <tr><td class="lbl">Sex / Civil Status</td><td>' . e($emp['sex']) . ' / ' . e($emp['civil_status'] ?? '—') . '</td></tr>
+                <tr><td class="lbl">CP Number</td><td>' . e($emp['contact_no'] ?? '—') . '</td></tr>
                 <tr><td class="lbl">Email</td><td>' . e($emp['email'] ?? '—') . '</td></tr>
                 <tr><td class="lbl">Address</td><td>' . e($emp['address'] ?? '—') . '</td></tr>
+                <tr><td class="lbl">Blood Type</td><td>' . e($emp['blood_type'] ?? '—') . '</td></tr>
+                <tr><td class="lbl">Height / Weight</td><td>' . $num($emp['height_cm'], 'cm') . ' / ' . $num($emp['weight_kg'], 'kg') . '</td></tr>
             </table>
         </td>
         <td width="130" align="right">' . $photo_html . '</td>
     </tr></table>
+
+    <h2>Government ID Numbers</h2>
+    <table class="info">
+        <tr><td class="lbl">SSS No.</td><td>' . e($emp['sss_no'] ?? '—') . '</td>
+            <td class="lbl">PhilHealth No.</td><td>' . e($emp['philhealth_no'] ?? '—') . '</td></tr>
+        <tr><td class="lbl">Pag-IBIG No.</td><td>' . e($emp['pagibig_no'] ?? '—') . '</td>
+            <td class="lbl">TIN No.</td><td>' . e($emp['tin_no'] ?? '—') . '</td></tr>
+    </table>
+
+    <table width="100%"><tr>
+        <td width="50%" valign="top"><h2>Personal Status</h2>' . $status_rows . '</td>
+        <td width="50%" valign="top"><h2>Eligibility</h2>' . $elig_rows . '</td>
+    </tr></table>
+
+    <h2>In Case of Emergency, Please Contact</h2>
+    <table class="info">
+        <tr><td class="lbl">Name</td><td>' . e($emp['emergency_contact_name'] ?? '—') . '</td>
+            <td class="lbl">Contact Number</td><td>' . e($emp['emergency_contact_no'] ?? '—') . '</td></tr>
+    </table>
+
     <h2>Employment Details</h2>
     <table class="info">
         <tr><td class="lbl">Department</td><td>' . e($emp['department_name'] ?? 'Unassigned') . '</td></tr>

@@ -68,14 +68,21 @@ $exclude = @(
     'PRE-DOWNGRADE-BACKUP.sql', 'BEFORE-CLEANUP-BACKUP.sql',
     'Start-EIS.bat', 'Stop-EIS.bat'
 )
-robocopy $appRoot $wwwDir /E /NFL /NDL /NJH /NJS /NP /XD $exclude /XF 'local.php' 'google_token.json' | Out-Null
+# google_oauth_client.json IS shipped: it identifies the application to Google
+# so the Backup page can offer "Connect Google Drive". google_token.json is a
+# specific person's authorisation and must never leave this machine.
+robocopy $appRoot $wwwDir /E /NFL /NDL /NJH /NJS /NP /XD $exclude `
+    /XF 'local.php' 'google_token.json' 'google_credentials.json' | Out-Null
 
-# Ship a clean slate: no local data, no credentials, empty upload folders
+# Ship a clean slate: no local data, no personal authorisation, empty uploads
 Get-ChildItem (Join-Path $wwwDir 'uploads') -Recurse -File -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -ne '.gitkeep' } | Remove-Item -Force
 Get-ChildItem (Join-Path $wwwDir 'backups') -File -ErrorAction SilentlyContinue |
     Where-Object { $_.Extension -eq '.sql' } | Remove-Item -Force
-Remove-Item (Join-Path $wwwDir 'config\google_credentials.json') -Force -ErrorAction SilentlyContinue
+$allowedConfig = @('app.php', 'db.php', '.htaccess', 'google_oauth_client.json')
+Get-ChildItem (Join-Path $wwwDir 'config') -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notin $allowedConfig } | Remove-Item -Force
+Get-ChildItem $wwwDir -Filter '*BACKUP*.sql' -File -ErrorAction SilentlyContinue | Remove-Item -Force
 Say ("application: {0} MB" -f [math]::Round((Get-ChildItem $wwwDir -Recurse -File | Measure-Object Length -Sum).Sum / 1MB, 1))
 
 # --------------------------------------------------------- 4. copy the stack
@@ -93,6 +100,12 @@ Copy-Item (Join-Path $ApacheSource 'conf\mime.types') (Join-Path $stackDir 'apac
 robocopy $PhpSource (Join-Path $stackDir 'php') /E /NFL /NDL /NJH /NJS /NP `
     /XF 'php.ini' 'php.ini-development' 'php.ini-production' | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $stackDir 'php\logs') | Out-Null
+
+# Root certificates, so outgoing HTTPS (the Google Drive backup) can verify
+# Google's certificate. Without this the bundled PHP fails with cURL error 60.
+$sslDir = Join-Path $stackDir 'php\extras\ssl'
+New-Item -ItemType Directory -Force -Path $sslDir | Out-Null
+Copy-Item (Join-Path $root 'certs\cacert.pem') (Join-Path $sslDir 'cacert.pem') -Force
 
 # Database: binaries + share (error messages / init scripts), never the data dir
 robocopy $DbSource (Join-Path $stackDir 'mariadb') /E /NFL /NDL /NJH /NJS /NP `
@@ -125,7 +138,7 @@ $iniTemplate = Get-Content (Join-Path $root 'templates\php.ini') -Raw
 $iniStaged   = $iniTemplate -replace '; \{#EXTENSIONS#\}', ($lines -join "`r`n")
 $tmpIni      = Join-Path $buildDir 'php-test.ini'
 # The test ini needs real paths, so resolve the placeholder to the build dir
-($iniStaged -replace '\{#APPDIR#\}', ($buildDir -replace '\\','/')) | Set-Content $tmpIni -Encoding ascii
+($iniStaged -replace '@@APPDIR@@', ($buildDir -replace '\\','/')) | Set-Content $tmpIni -Encoding ascii
 Set-Content (Join-Path $root 'templates\php.ini.generated') $iniStaged -Encoding ascii
 Say ("{0} extensions enabled: {1}" -f $lines.Count, (($lines | ForEach-Object { $_ -replace '.*=','' }) -join ', '))
 
@@ -141,6 +154,17 @@ $required = @(
 $missing = $required | Where-Object { -not (Test-Path (Join-Path $buildDir $_)) }
 if ($missing) { $missing | ForEach-Object { Write-Host "  MISSING: $_" -ForegroundColor Red }; Fail 'staging incomplete' }
 Say 'all required files present' 'Green'
+
+# No personal authorisation or local data may reach the distributable installer
+$allowedShipped = @('composer.json', 'composer.lock', 'google_oauth_client.json')
+$secrets = Get-ChildItem $wwwDir -Recurse -File -Include '*.json', 'local.php' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notlike '*\vendor\*' -and $_.Name -notin $allowedShipped }
+if ($secrets) {
+    $secrets | ForEach-Object { Write-Host "  LEAK: $($_.FullName)" -ForegroundColor Red }
+    Fail 'private files would be shipped in the installer'
+}
+if (Test-Path (Join-Path $wwwDir 'config\google_token.json')) { Fail 'a personal Google token would be shipped' }
+Say 'no personal tokens or local data in the package' 'Green'
 
 # The extensions the application genuinely needs, however they are provided
 $stagedPhp = Join-Path $stackDir 'php\php.exe'

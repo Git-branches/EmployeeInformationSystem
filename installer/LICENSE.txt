@@ -1,11 +1,11 @@
-EMPLOYEE INFORMATION SYSTEM - TERMS OF USE
-BSIT Capstone Project | Jollibee Tupi
+EMPLOYEE INFORMATION SYSTEM 1.0.0 - TERMS OF USE
+Developed by Rhon Jon G. Romero
+Copyright (C) 2026 Rhon Jon G. Romero. All rights reserved.
 
 1. PURPOSE
-   This software was developed as an academic capstone project for the
-   management of employee records at Jollibee Tupi, National Highway,
-   Brgy. Poblacion, Tupi. It is provided for the use of the authorised
-   administrators of that establishment and for academic evaluation.
+   This software manages employee and applicant records for Jollibee Tupi,
+   National Highway, Brgy. Poblacion, Tupi. It is provided for the use of
+   the authorised administrators of that establishment.
 
 2. DATA PRIVACY
    The system stores personal information of employees and applicants.
@@ -35,10 +35,13 @@ BSIT Capstone Project | Jollibee Tupi
    developers are not liable for data loss or damages arising from its use.
    Regular backups are the responsibility of the operator.
 
-5. TRADEMARKS
-   "Jollibee" and the Jollibee logo are trademarks of Jollibee Foods
-   Corporation, used here only to identify the establishment for which
-   this academic project was prepared. This software is not an official
-   Jollibee Foods Corporation product.
+5. TRADEMARKS AND VISUAL IDENTITY
+   This software has its own visual identity. It does not use the logo,
+   colour scheme, imagery or any other branding of Jollibee Foods
+   Corporation. The name "Jollibee Tupi" appears only as the name of the
+   establishment whose employee records the system manages. "Jollibee" is
+   a trademark of Jollibee Foods Corporation. This software is not an
+   official Jollibee Foods Corporation product and is not endorsed by or
+   affiliated with it.
 
 By continuing with this installation you acknowledge these terms.

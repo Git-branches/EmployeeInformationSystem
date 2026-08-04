@@ -1,3 +1,0 @@
-# Nothing in this folder may be requested directly from a browser.
-# It holds database credentials and the Google service-account private key.
-Require all denied

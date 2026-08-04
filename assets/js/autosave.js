@@ -23,10 +23,14 @@
         });
     }
 
+    function isCheck(el) {
+        return el.type === 'checkbox' || el.type === 'radio';
+    }
+
     function save() {
         const data = {};
         fields().forEach(function (el) {
-            data[el.name] = el.value;
+            data[el.name] = isCheck(el) ? el.checked : el.value;
         });
         try {
             localStorage.setItem(key, JSON.stringify(data));
@@ -47,11 +51,15 @@
 
         // Only restore into an untouched form (don't clobber server values on edit pages)
         const dirty = fields().some(function (el) {
-            return el.value !== '' && data[el.name] !== undefined && data[el.name] !== el.value;
+            return !isCheck(el) && el.value !== '' &&
+                data[el.name] !== undefined && data[el.name] !== el.value;
         });
 
         fields().forEach(function (el) {
-            if (data[el.name] !== undefined && (el.value === '' || !dirty)) {
+            if (data[el.name] === undefined) return;
+            if (isCheck(el)) {
+                if (!dirty) el.checked = data[el.name] === true;
+            } else if (el.value === '' || !dirty) {
                 el.value = data[el.name];
             }
         });

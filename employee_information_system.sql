@@ -1,6 +1,6 @@
 -- =============================================================
 -- Employee Information System — Database Schema
--- Capstone Project: Jollibee Tupi (Brgy. Poblacion, Tupi)
+-- Jollibee Tupi (Brgy. Poblacion, Tupi)
 -- Engine: MySQL (InnoDB) | Charset: utf8mb4
 -- =============================================================
 
@@ -45,10 +45,38 @@ CREATE TABLE employees (
   middle_name       VARCHAR(60)  NULL,
   last_name         VARCHAR(60)  NOT NULL,
   birthdate         DATE         NOT NULL,
+  birthplace        VARCHAR(150) NULL,
   sex               ENUM('Male','Female') NOT NULL,
+  civil_status      ENUM('Single','Married','Widowed','Separated','Annulled') NULL,
+  blood_type        ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NULL,
+  height_cm         DECIMAL(5,2) NULL COMMENT 'centimetres',
+  weight_kg         DECIMAL(5,2) NULL COMMENT 'kilograms',
   contact_no        VARCHAR(20)  NULL,
   email             VARCHAR(100) NULL,
   address           VARCHAR(255) NULL,
+
+  -- Government ID numbers. Whether a copy of each document has been
+  -- submitted is tracked separately in employee_requirements.
+  sss_no            VARCHAR(20)  NULL,
+  philhealth_no     VARCHAR(20)  NULL,
+  pagibig_no        VARCHAR(20)  NULL,
+  tin_no            VARCHAR(20)  NULL,
+
+  -- Personal status
+  is_solo_parent    TINYINT(1)   NOT NULL DEFAULT 0,
+  is_ip             TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Indigenous People',
+  is_pwd            TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Person with Disability',
+  is_smoker         TINYINT(1)   NOT NULL DEFAULT 0,
+
+  -- Eligibility
+  elig_professional     TINYINT(1) NOT NULL DEFAULT 0,
+  elig_sub_professional TINYINT(1) NOT NULL DEFAULT 0,
+  elig_ra1080           TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'RA 1080 (Bar/Board passer)',
+
+  -- Emergency contact
+  emergency_contact_name VARCHAR(150) NULL,
+  emergency_contact_no   VARCHAR(20)  NULL,
+
   photo_path        VARCHAR(255) NULL,
   department_id     INT UNSIGNED NULL,
   position          VARCHAR(100) NULL,

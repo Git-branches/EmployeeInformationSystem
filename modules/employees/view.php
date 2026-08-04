@@ -48,6 +48,19 @@ $status_badge = [
 
 $pending = count(array_filter($requirements, fn($r) => in_array($r['status'], ['Missing', 'Incomplete'], true)));
 
+// Ticked personal-status and eligibility boxes, for display
+$personal_status = array_keys(array_filter([
+    'Solo Parent'                 => $emp['is_solo_parent'],
+    'IP (Indigenous People)'      => $emp['is_ip'],
+    'PWD (Person with Disability)' => $emp['is_pwd'],
+    'Smoker'                      => $emp['is_smoker'],
+]));
+$eligibility = array_keys(array_filter([
+    'Professional'     => $emp['elig_professional'],
+    'Sub-Professional' => $emp['elig_sub_professional'],
+    'RA 1080'          => $emp['elig_ra1080'],
+]));
+
 $page_title = $emp['first_name'] . ' ' . $emp['last_name'];
 require __DIR__ . '/../../includes/header.php';
 ?>
@@ -88,9 +101,93 @@ require __DIR__ . '/../../includes/header.php';
                 </li>
             </ul>
         </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white fw-semibold">Emergency Contact</div>
+            <div class="card-body">
+                <?php if ($emp['emergency_contact_name'] || $emp['emergency_contact_no']): ?>
+                    <div class="fw-semibold"><i class="bi bi-person-heart me-2 text-danger"></i><?= e($emp['emergency_contact_name'] ?? '—') ?></div>
+                    <div class="ms-4"><i class="bi bi-telephone-fill me-2 text-danger"></i><?= e($emp['emergency_contact_no'] ?? '—') ?></div>
+                <?php else: ?>
+                    <div class="text-muted small">No emergency contact recorded yet.</div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
     <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">Personal Details</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="text-muted small">Birthplace</div>
+                        <div><?= e($emp['birthplace'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="text-muted small">Civil Status</div>
+                        <div><?= e($emp['civil_status'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-4 col-lg-4">
+                        <div class="text-muted small">Blood Type</div>
+                        <div><?= e($emp['blood_type'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-4 col-lg-4">
+                        <div class="text-muted small">Height</div>
+                        <div><?= $emp['height_cm'] !== null ? e(rtrim(rtrim($emp['height_cm'], '0'), '.')) . ' cm' : '—' ?></div>
+                    </div>
+                    <div class="col-sm-4 col-lg-4">
+                        <div class="text-muted small">Weight</div>
+                        <div><?= $emp['weight_kg'] !== null ? e(rtrim(rtrim($emp['weight_kg'], '0'), '.')) . ' kg' : '—' ?></div>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="text-muted small">SSS No.</div>
+                        <div><?= e($emp['sss_no'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="text-muted small">PhilHealth No.</div>
+                        <div><?= e($emp['philhealth_no'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="text-muted small">Pag-IBIG No.</div>
+                        <div><?= e($emp['pagibig_no'] ?? '—') ?></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="text-muted small">TIN No.</div>
+                        <div><?= e($emp['tin_no'] ?? '—') ?></div>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="text-muted small mb-1">Personal Status</div>
+                        <?php if ($personal_status): ?>
+                            <?php foreach ($personal_status as $label): ?>
+                                <span class="badge text-bg-secondary me-1"><i class="bi bi-check2 me-1"></i><?= e($label) ?></span>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <span class="text-muted">None</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small mb-1">Eligibility</div>
+                        <?php if ($eligibility): ?>
+                            <?php foreach ($eligibility as $label): ?>
+                                <span class="badge text-bg-primary me-1"><i class="bi bi-award me-1"></i><?= e($label) ?></span>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <span class="text-muted">None</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="fw-semibold">Requirements Checklist</span>

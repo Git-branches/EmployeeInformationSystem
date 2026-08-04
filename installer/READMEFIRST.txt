@@ -1,6 +1,7 @@
-EMPLOYEE INFORMATION SYSTEM
-Jollibee Tupi - National Highway, Brgy. Poblacion, Tupi
-BSIT Capstone Project
+EMPLOYEE INFORMATION SYSTEM  1.0.0
+Developed by Rhon Jon G. Romero
+
+For Jollibee Tupi - National Highway, Brgy. Poblacion, Tupi
 
 WHAT THIS INSTALLER DOES
 ------------------------

@@ -55,11 +55,20 @@ require __DIR__ . '/../../includes/header.php';
                 <table class="table table-sm table-borderless mb-0">
                     <tr><td class="text-muted" style="width:170px">Employee No.</td><td class="fw-semibold"><?= e($emp['employee_no'] ?? '—') ?></td></tr>
                     <tr><td class="text-muted">Full Name</td><td class="fw-semibold"><?= e($emp['first_name'] . ' ' . ($emp['middle_name'] ? $emp['middle_name'] . ' ' : '') . $emp['last_name']) ?></td></tr>
-                    <tr><td class="text-muted">Birthdate</td><td><?= e(date('F j, Y', strtotime($emp['birthdate']))) ?></td></tr>
-                    <tr><td class="text-muted">Sex</td><td><?= e($emp['sex']) ?></td></tr>
-                    <tr><td class="text-muted">Contact No.</td><td><?= e($emp['contact_no'] ?? '—') ?></td></tr>
+                    <tr><td class="text-muted">Birthday</td><td><?= e(date('F j, Y', strtotime($emp['birthdate']))) ?></td></tr>
+                    <tr><td class="text-muted">Birthplace</td><td><?= e($emp['birthplace'] ?? '—') ?></td></tr>
+                    <tr><td class="text-muted">Sex / Civil Status</td><td><?= e($emp['sex']) ?> / <?= e($emp['civil_status'] ?? '—') ?></td></tr>
+                    <tr><td class="text-muted">CP Number</td><td><?= e($emp['contact_no'] ?? '—') ?></td></tr>
                     <tr><td class="text-muted">Email</td><td><?= e($emp['email'] ?? '—') ?></td></tr>
                     <tr><td class="text-muted">Address</td><td><?= e($emp['address'] ?? '—') ?></td></tr>
+                    <tr>
+                        <td class="text-muted">Blood Type / Height / Weight</td>
+                        <td>
+                            <?= e($emp['blood_type'] ?? '—') ?> /
+                            <?= $emp['height_cm'] !== null ? e(rtrim(rtrim($emp['height_cm'], '0'), '.')) . ' cm' : '—' ?> /
+                            <?= $emp['weight_kg'] !== null ? e(rtrim(rtrim($emp['weight_kg'], '0'), '.')) . ' kg' : '—' ?>
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="col-3 text-center">
@@ -70,6 +79,44 @@ require __DIR__ . '/../../includes/header.php';
                 <?php endif; ?>
             </div>
         </div>
+
+        <h3 class="h6 text-uppercase border-bottom pb-2">Government ID Numbers</h3>
+        <table class="table table-sm table-borderless mb-4">
+            <tr>
+                <td class="text-muted" style="width:170px">SSS No.</td><td><?= e($emp['sss_no'] ?? '—') ?></td>
+                <td class="text-muted" style="width:150px">PhilHealth No.</td><td><?= e($emp['philhealth_no'] ?? '—') ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Pag-IBIG No.</td><td><?= e($emp['pagibig_no'] ?? '—') ?></td>
+                <td class="text-muted">TIN No.</td><td><?= e($emp['tin_no'] ?? '—') ?></td>
+            </tr>
+        </table>
+
+        <div class="row mb-4">
+            <div class="col-6">
+                <h3 class="h6 text-uppercase border-bottom pb-2">Personal Status</h3>
+                <?php foreach (['is_solo_parent' => 'Solo Parent', 'is_ip' => 'IP (Indigenous People)',
+                                'is_pwd' => 'PWD (Person with Disability)', 'is_smoker' => 'Smoker'] as $key => $label): ?>
+                    <div><span class="me-2"><?= !empty($emp[$key]) ? '&#9745;' : '&#9744;' ?></span><?= e($label) ?></div>
+                <?php endforeach; ?>
+            </div>
+            <div class="col-6">
+                <h3 class="h6 text-uppercase border-bottom pb-2">Eligibility</h3>
+                <?php foreach (['elig_professional' => 'Professional (Prof.)',
+                                'elig_sub_professional' => 'Sub-Professional (Sub-Prof.)',
+                                'elig_ra1080' => 'RA 1080'] as $key => $label): ?>
+                    <div><span class="me-2"><?= !empty($emp[$key]) ? '&#9745;' : '&#9744;' ?></span><?= e($label) ?></div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <h3 class="h6 text-uppercase border-bottom pb-2">In Case of Emergency, Please Contact</h3>
+        <table class="table table-sm table-borderless mb-4">
+            <tr>
+                <td class="text-muted" style="width:170px">Name</td><td><?= e($emp['emergency_contact_name'] ?? '—') ?></td>
+                <td class="text-muted" style="width:150px">Contact Number</td><td><?= e($emp['emergency_contact_no'] ?? '—') ?></td>
+            </tr>
+        </table>
 
         <h3 class="h6 text-uppercase border-bottom pb-2">Employment Details</h3>
         <table class="table table-sm table-borderless mb-4">

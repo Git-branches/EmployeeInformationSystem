@@ -51,16 +51,58 @@ function parse_date(mixed $value): ?string
 
 $field_map = [
     'employeeno' => 'employee_no',   'firstname' => 'first_name',
+    'givenname' => 'first_name',
     'middlename' => 'middle_name',   'lastname' => 'last_name',
+    'surname' => 'last_name',        'familyname' => 'last_name',
     'birthdate' => 'birthdate',      'dateofbirth' => 'birthdate',
+    'birthday' => 'birthdate',       'birthplace' => 'birthplace',
+    'placeofbirth' => 'birthplace',
     'sex' => 'sex',                  'gender' => 'sex',
+    'civilstatus' => 'civil_status',
     'contactno' => 'contact_no',     'contactnumber' => 'contact_no',
+    'cpnumber' => 'contact_no',      'cpno' => 'contact_no',
+    'mobilenumber' => 'contact_no',
     'email' => 'email',              'emailaddress' => 'email',
     'address' => 'address',          'department' => 'department',
     'position' => 'position',        'applicanttype' => 'applicant_type',
     'employmentstatus' => 'employment_status', 'status' => 'employment_status',
     'datehired' => 'date_hired',
+    // Physical details
+    'bloodtype' => 'blood_type',
+    'height' => 'height_cm',         'heightcm' => 'height_cm',
+    'weight' => 'weight_kg',         'weightkg' => 'weight_kg',
+    // Government IDs
+    'sssno' => 'sss_no',             'sss' => 'sss_no',
+    'philhealthno' => 'philhealth_no', 'philhealth' => 'philhealth_no',
+    'pagibigno' => 'pagibig_no',     'pagibig' => 'pagibig_no',
+    'tinno' => 'tin_no',             'tin' => 'tin_no',
+    // Personal status
+    'soloparent' => 'is_solo_parent',
+    'ip' => 'is_ip',                 'indigenouspeople' => 'is_ip',
+    'pwd' => 'is_pwd',               'personwithdisability' => 'is_pwd',
+    'smoker' => 'is_smoker',
+    // Eligibility
+    'professional' => 'elig_professional',       'prof' => 'elig_professional',
+    'subprofessional' => 'elig_sub_professional', 'subprof' => 'elig_sub_professional',
+    'ra1080' => 'elig_ra1080',
+    // Emergency contact
+    'emergencycontactname' => 'emergency_contact_name',
+    'emergencycontact' => 'emergency_contact_name',
+    'incaseofemergencypleasecontact' => 'emergency_contact_name',
+    'emergencycontactnumber' => 'emergency_contact_no',
+    'emergencycontactno' => 'emergency_contact_no',
 ];
+
+/** Columns that hold Yes/No checkbox values. */
+const BOOL_FIELDS = ['is_solo_parent', 'is_ip', 'is_pwd', 'is_smoker',
+                     'elig_professional', 'elig_sub_professional', 'elig_ra1080'];
+
+/** Interpret Yes/No/True/1/x from a spreadsheet cell. */
+function parse_bool(mixed $value): int
+{
+    $v = strtolower(trim((string)$value));
+    return in_array($v, ['yes', 'y', 'true', '1', 'x', 'oo', 'opo'], true) ? 1 : 0;
+}
 
 $rows = [];
 
@@ -77,9 +119,16 @@ try {
                 continue;
             }
             $row = [];
-            foreach (['Employee No', 'First Name', 'Middle Name', 'Last Name', 'Birthdate',
-                      'Sex', 'Contact No', 'Email', 'Address', 'Department', 'Position',
-                      'Applicant Type', 'Employment Status', 'Date Hired'] as $label) {
+            foreach (['Employee No', 'First Name', 'Middle Name', 'Last Name', 'Surname',
+                      'Birthdate', 'Birthday', 'Birthplace', 'Sex', 'Civil Status',
+                      'Contact No', 'CP Number', 'Email', 'Address',
+                      'Blood Type', 'Height', 'Weight',
+                      'SSS No', 'PhilHealth No', 'Pag-IBIG No', 'TIN No',
+                      'Solo Parent', 'IP', 'PWD', 'Smoker',
+                      'Professional', 'Sub-Professional', 'RA 1080',
+                      'Emergency Contact Name', 'Emergency Contact Number',
+                      'Department', 'Position', 'Applicant Type', 'Employment Status',
+                      'Date Hired'] as $label) {
                 $pattern = '/' . str_replace(' ', '\s*', preg_quote($label, '/')) . '\s*[:\-]\s*(.+)/i';
                 if (preg_match($pattern, $block, $m)) {
                     $key = $field_map[$norm($label)] ?? null;
@@ -151,6 +200,27 @@ foreach ($rows as $i => &$row) {
     $status = ucfirst(strtolower(trim((string)($row['employment_status'] ?? ''))));
     $row['employment_status'] = in_array($status, ['Applicant', 'Active', 'Inactive', 'Terminated'], true) ? $status : 'Applicant';
     $row['employee_no'] = trim((string)($row['employee_no'] ?? '')) ?: null;
+
+    // Civil status and blood type must match the allowed values, else ignored
+    $civil = ucfirst(strtolower(trim((string)($row['civil_status'] ?? ''))));
+    $row['civil_status'] = in_array($civil, ['Single', 'Married', 'Widowed', 'Separated', 'Annulled'], true) ? $civil : null;
+
+    $blood = strtoupper(str_replace(' ', '', (string)($row['blood_type'] ?? '')));
+    $blood = str_replace(['POSITIVE', 'NEGATIVE', 'POS', 'NEG'], ['+', '-', '+', '-'], $blood);
+    $row['blood_type'] = in_array($blood, ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], true) ? $blood : null;
+
+    // Height/weight: keep only sensible numbers
+    foreach (['height_cm' => 300, 'weight_kg' => 500] as $field => $max) {
+        $raw = trim((string)($row[$field] ?? ''));
+        $raw = preg_replace('/[^0-9.]/', '', $raw);          // strip "cm", "kg", etc.
+        $row[$field] = ($raw !== '' && is_numeric($raw) && (float)$raw > 0 && (float)$raw <= $max)
+            ? round((float)$raw, 2) : null;
+    }
+
+    // Yes/No columns
+    foreach (BOOL_FIELDS as $field) {
+        $row[$field] = parse_bool($row[$field] ?? null);
+    }
 
     // Verdict
     if (empty($row['first_name']) || empty($row['last_name']) || !$row['birthdate'] || !$row['sex']) {

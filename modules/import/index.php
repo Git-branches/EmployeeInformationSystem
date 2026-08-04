@@ -11,15 +11,34 @@ if (isset($_GET['template'])) {
     $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Employees');
-    $headers = ['Employee No', 'First Name', 'Middle Name', 'Last Name', 'Birthdate',
-                'Sex', 'Contact No', 'Email', 'Address', 'Department', 'Position',
-                'Applicant Type', 'Employment Status', 'Date Hired'];
+    $headers = ['Employee No', 'First Name', 'Middle Name', 'Surname', 'Birthday', 'Birthplace',
+                'Sex', 'Civil Status', 'CP Number', 'Email', 'Address',
+                'Blood Type', 'Height', 'Weight',
+                'SSS No', 'PhilHealth No', 'Pag-IBIG No', 'TIN No',
+                'Solo Parent', 'IP', 'PWD', 'Smoker',
+                'Professional', 'Sub-Professional', 'RA 1080',
+                'Emergency Contact Name', 'Emergency Contact Number',
+                'Department', 'Position', 'Applicant Type', 'Employment Status', 'Date Hired'];
     $sheet->fromArray($headers, null, 'A1');
-    $sheet->getStyle('A1:N1')->getFont()->setBold(true);
-    $sheet->fromArray(['JB-0001', 'Juan', 'Santos', 'Dela Cruz', '1998-05-14', 'Male',
-                       '09171234567', 'juan@example.com', 'Poblacion, Tupi', 'Service Crew',
-                       'Cashier', 'New', 'Applicant', ''], null, 'A2');
-    foreach (range('A', 'N') as $col) {
+    $sheet->getStyle('A1:AF1')->getFont()->setBold(true);
+    $sheet->fromArray(['JB-0001', 'Juan', 'Santos', 'Dela Cruz', '1998-05-14', 'Tupi, South Cotabato',
+                       'Male', 'Single', '09171234567', 'juan@example.com', 'Poblacion, Tupi',
+                       'O+', '170', '65',
+                       '34-1234567-8', '12-345678901-2', '1234-5678-9012', '123-456-789-000',
+                       'No', 'No', 'No', 'Yes',
+                       'Yes', 'No', 'No',
+                       'Maria Dela Cruz', '09181234567',
+                       'Service Crew', 'Cashier', 'New', 'Applicant', ''], null, 'A2');
+
+    // Note row so the encoder knows how the checkbox columns work
+    $sheet->setCellValue('A4', 'Note: For the checkbox columns (Solo Parent, IP, PWD, Smoker, Professional, '
+        . 'Sub-Professional, RA 1080) type Yes or No. Leave any column blank if the information is not available.');
+    $sheet->getStyle('A4')->getFont()->setItalic(true);
+
+    foreach (range('A', 'Z') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+    foreach (['AA', 'AB', 'AC', 'AD', 'AE', 'AF'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

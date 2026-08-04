@@ -24,11 +24,7 @@
         <i class="bi bi-list"></i>
     </button>
     <span class="navbar-brand fw-bold text-truncate">
-        <?php if (is_file(ROOT_PATH . '/assets/img/logo.png')): ?>
-            <span class="navbar-logo"><img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Jollibee" height="38"></span>
-        <?php else: ?>
-            <span class="brand-bee">🐝</span>
-        <?php endif; ?><span class="d-none d-sm-inline"><?= e(APP_NAME) ?></span><span class="d-sm-none">EIS</span>
+        <span class="brand-mark">EIS</span><span class="d-none d-sm-inline"><?= e(APP_NAME) ?></span><span class="d-sm-none">EIS</span>
     </span>
     </div>
     <div class="d-flex align-items-center gap-3">
