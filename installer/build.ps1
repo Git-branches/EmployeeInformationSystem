@@ -146,6 +146,7 @@ Say ("{0} extensions enabled: {1}" -f $lines.Count, (($lines | ForEach-Object { 
 Write-Host "`n[5/6] Verifying the staged files..." -ForegroundColor Yellow
 $required = @(
     'www\index.php', 'www\config\app.php', 'www\employee_information_system.sql',
+    'www\migrations\upgrade.sql',
     'www\vendor\autoload.php', 'stack\apache\bin\httpd.exe',
     'stack\php\php8apache2_4.dll', 'stack\php\php.exe',
     'stack\mariadb\bin\mysqld.exe', 'stack\mariadb\bin\mysql.exe', 'stack\mariadb\bin\mysqldump.exe',

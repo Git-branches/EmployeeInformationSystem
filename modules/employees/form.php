@@ -30,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         return ($v === '' || !is_numeric($v)) ? null : round((float)$v, 2);
     };
 
+    // Salary is validated separately (below) so a bad figure is reported
+    // instead of being silently dropped like the other optional numbers.
+    $salary_raw = trim((string)($_POST['monthly_salary'] ?? ''));
+    $salary_ok  = $salary_raw === ''
+        || (is_numeric($salary_raw) && (float)$salary_raw >= 0 && (float)$salary_raw <= 9999999999.99);
+
     $data = [
         // ---- Personal information
         'employee_no'   => $text('employee_no'),
@@ -74,10 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'applicant_type'    => (string)($_POST['applicant_type'] ?? 'New'),
         'employment_status' => (string)($_POST['employment_status'] ?? 'Applicant'),
         'date_hired'        => (string)($_POST['date_hired'] ?? '') ?: null,
+
+        // ---- Compensation
+        // Only the monthly salary is stored; the daily salary is always
+        // derived from it with daily_salary().
+        'monthly_salary'    => ($salary_ok && $salary_raw !== '') ? round((float)$salary_raw, 2) : null,
     ];
 
-    if ($data['first_name'] === '' || $data['last_name'] === '' || $data['birthdate'] === '') {
+    // Names, addresses and other free-text entries are recorded in upper case.
+    $data = upper_employee_fields($data);
+
+    if (($data['first_name'] ?? '') === '' || ($data['last_name'] ?? '') === '' || $data['birthdate'] === '') {
         $error = 'First name, surname, and birthday are required.';
+    } elseif (!$salary_ok) {
+        $error = 'Monthly salary must be a number of 0 or more.';
     } elseif (!in_array($data['sex'], ['Male', 'Female'], true)) {
         $error = 'Please select a sex.';
     } elseif ($data['civil_status'] !== null && !in_array($data['civil_status'], $CIVIL_STATUS, true)) {
@@ -135,7 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     // Re-fill the form with what was submitted when validation failed
-    $employee = array_merge($employee ?? [], $data, ['photo_path' => $employee['photo_path'] ?? null]);
+    $employee = array_merge($employee ?? [], $data, [
+        'photo_path'     => $employee['photo_path'] ?? null,
+        'monthly_salary' => $salary_raw,   // keep the figure as typed, so it can be corrected
+    ]);
 }
 
 $departments = $pdo->query('SELECT department_id, department_name FROM departments ORDER BY department_name')->fetchAll();
@@ -146,6 +165,10 @@ require __DIR__ . '/../../includes/header.php';
 $v   = fn(string $key) => e((string)($employee[$key] ?? ''));
 $sel = fn(string $key, string $val) => ($employee[$key] ?? '') === $val ? 'selected' : '';
 $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
+
+// Server-side value for the read-only daily salary box; the same figure the
+// browser recomputes as the monthly salary is typed.
+$emp_daily = daily_salary($employee['monthly_salary'] ?? null);
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">
@@ -168,15 +191,15 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <label class="form-label">First Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="first_name" maxlength="60" required value="<?= $v('first_name') ?>">
+                <input type="text" class="form-control" name="first_name" maxlength="60" required data-uppercase value="<?= $v('first_name') ?>">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Middle Name</label>
-                <input type="text" class="form-control" name="middle_name" maxlength="60" value="<?= $v('middle_name') ?>">
+                <input type="text" class="form-control" name="middle_name" maxlength="60" data-uppercase value="<?= $v('middle_name') ?>">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Surname <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="last_name" maxlength="60" required value="<?= $v('last_name') ?>">
+                <input type="text" class="form-control" name="last_name" maxlength="60" required data-uppercase value="<?= $v('last_name') ?>">
             </div>
 
             <div class="col-md-3">
@@ -185,7 +208,7 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
             </div>
             <div class="col-md-5">
                 <label class="form-label">Birthplace</label>
-                <input type="text" class="form-control" name="birthplace" maxlength="150" value="<?= $v('birthplace') ?>">
+                <input type="text" class="form-control" name="birthplace" maxlength="150" data-uppercase value="<?= $v('birthplace') ?>">
             </div>
             <div class="col-md-2">
                 <label class="form-label">Sex <span class="text-danger">*</span></label>
@@ -234,7 +257,7 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
 
             <div class="col-12">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-control" name="address" maxlength="255" value="<?= $v('address') ?>">
+                <input type="text" class="form-control" name="address" maxlength="255" data-uppercase value="<?= $v('address') ?>">
             </div>
         </div>
 
@@ -309,7 +332,7 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
             <div class="col-md-7">
                 <label class="form-label">In Case of Emergency, Please Contact</label>
                 <input type="text" class="form-control" name="emergency_contact_name" maxlength="150"
-                       placeholder="Full name" value="<?= $v('emergency_contact_name') ?>">
+                       placeholder="Full name" data-uppercase value="<?= $v('emergency_contact_name') ?>">
             </div>
             <div class="col-md-5">
                 <label class="form-label">Contact Number</label>
@@ -324,7 +347,7 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
             <div class="col-md-3">
                 <label class="form-label">Employee No.</label>
                 <input type="text" class="form-control" name="employee_no" maxlength="20"
-                       placeholder="Leave blank for applicants" value="<?= $v('employee_no') ?>">
+                       placeholder="Leave blank for applicants" data-uppercase value="<?= $v('employee_no') ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Department</label>
@@ -340,7 +363,7 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
             </div>
             <div class="col-md-3">
                 <label class="form-label">Position</label>
-                <input type="text" class="form-control" name="position" maxlength="100" value="<?= $v('position') ?>">
+                <input type="text" class="form-control" name="position" maxlength="100" data-uppercase value="<?= $v('position') ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Date Hired</label>
@@ -361,6 +384,25 @@ $chk = fn(string $key) => !empty($employee[$key]) ? 'checked' : '';
                     <?php endforeach; ?>
                 </select>
             </div>
+            <div class="col-md-3">
+                <label class="form-label" for="monthly_salary">Monthly Salary</label>
+                <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input type="number" step="0.01" min="0" max="9999999999.99" class="form-control"
+                           id="monthly_salary" name="monthly_salary" placeholder="0.00" value="<?= $v('monthly_salary') ?>">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="daily_salary">Daily Salary</label>
+                <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input type="text" class="form-control bg-light" id="daily_salary" readonly tabindex="-1"
+                           data-working-days="<?= WORKING_DAYS_PER_MONTH ?>"
+                           value="<?= $emp_daily !== null ? e(number_format($emp_daily, 2)) : '' ?>">
+                </div>
+                <div class="form-text">Computed automatically: monthly ÷ <?= WORKING_DAYS_PER_MONTH ?> working days.</div>
+            </div>
+
             <div class="col-md-6">
                 <label class="form-label">Photo (JPG/PNG, max 2 MB)</label>
                 <input type="file" class="form-control" name="photo" accept=".jpg,.jpeg,.png">

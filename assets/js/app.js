@@ -8,6 +8,19 @@ document.addEventListener('submit', function (event) {
     }
 });
 
+// Fields marked data-uppercase are typed in upper case, matching how the
+// information form is filled up. The caret is kept where the user left it.
+document.addEventListener('input', function (event) {
+    const field = event.target;
+    if (!field.dataset || field.dataset.uppercase === undefined) return;
+    const upper = field.value.toUpperCase();
+    if (upper === field.value) return;
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    field.value = upper;
+    if (start !== null) field.setSelectionRange(start, end);
+});
+
 // Auto-dismiss alerts after 5 seconds.
 document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
     setTimeout(function () {
@@ -16,6 +29,32 @@ document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
         }
     }, 5000);
 });
+
+// ---- Daily salary, derived from the monthly salary --------------------------
+// Mirrors daily_salary() in includes/functions.php: monthly ÷ working days,
+// rounded to two decimals. The box is read-only, so this is the only way it
+// can be filled in.
+(function () {
+    const monthly = document.getElementById('monthly_salary');
+    const daily = document.getElementById('daily_salary');
+    if (!monthly || !daily) return;
+
+    const workingDays = parseInt(daily.dataset.workingDays, 10) || 22;
+
+    function recalculate() {
+        const value = parseFloat(monthly.value);
+        daily.value = (isNaN(value) || value < 0)
+            ? ''
+            : (value / workingDays).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+    }
+
+    monthly.addEventListener('input', recalculate);
+    // Run after autosave.js has restored any draft, so the two always agree.
+    window.addEventListener('load', recalculate);
+})();
 
 // ---- Live notifications bell ------------------------------------------------
 (function () {

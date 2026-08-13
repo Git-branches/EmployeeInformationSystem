@@ -198,6 +198,14 @@ nav.navbar {
 .progress-bar.bg-success { background-color: #0f766e !important; }
 
 /* ---- Login page ------------------------------------------------------ */
+
+/* Edge adds its own reveal control inside password fields. The login form
+   already provides one next to the field, so hide the built-in duplicate. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
 .login-page {
     min-height: 100vh;
     display: flex;

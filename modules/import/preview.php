@@ -67,6 +67,9 @@ $field_map = [
     'position' => 'position',        'applicanttype' => 'applicant_type',
     'employmentstatus' => 'employment_status', 'status' => 'employment_status',
     'datehired' => 'date_hired',
+    // Compensation (the daily salary is derived, never imported)
+    'monthlysalary' => 'monthly_salary', 'salary' => 'monthly_salary',
+    'basicsalary' => 'monthly_salary',   'monthlyrate' => 'monthly_salary',
     // Physical details
     'bloodtype' => 'blood_type',
     'height' => 'height_cm',         'heightcm' => 'height_cm',
@@ -128,7 +131,7 @@ try {
                       'Professional', 'Sub-Professional', 'RA 1080',
                       'Emergency Contact Name', 'Emergency Contact Number',
                       'Department', 'Position', 'Applicant Type', 'Employment Status',
-                      'Date Hired'] as $label) {
+                      'Date Hired', 'Monthly Salary'] as $label) {
                 $pattern = '/' . str_replace(' ', '\s*', preg_quote($label, '/')) . '\s*[:\-]\s*(.+)/i';
                 if (preg_match($pattern, $block, $m)) {
                     $key = $field_map[$norm($label)] ?? null;
@@ -217,10 +220,19 @@ foreach ($rows as $i => &$row) {
             ? round((float)$raw, 2) : null;
     }
 
+    // Monthly salary: strip "₱", commas and spaces but keep the sign, so a
+    // negative figure is dropped instead of silently becoming positive
+    $salary = preg_replace('/[^0-9.\-]/', '', trim((string)($row['monthly_salary'] ?? '')));
+    $row['monthly_salary'] = ($salary !== '' && is_numeric($salary) && (float)$salary >= 0
+        && (float)$salary <= 9999999999.99) ? round((float)$salary, 2) : null;
+
     // Yes/No columns
     foreach (BOOL_FIELDS as $field) {
         $row[$field] = parse_bool($row[$field] ?? null);
     }
+
+    // Same upper-case rule as the fill-up form, so imported records match
+    $row = upper_employee_fields($row);
 
     // Verdict
     if (empty($row['first_name']) || empty($row['last_name']) || !$row['birthdate'] || !$row['sex']) {

@@ -91,6 +91,22 @@ if "%DBEXISTS%"=="0" (
     call :log "database already existed, import skipped"
 )
 
+rem ---- 3b. Bring an existing database up to date ----
+rem A fresh import already matches the current schema, but an installation
+rem being upgraded can predate columns added since it was set up. upgrade.sql
+rem adds only what is missing, so running it every time is safe.
+set "UPGRADESQL=%APPDIR%\www\migrations\upgrade.sql"
+if exist "%UPGRADESQL%" (
+    echo Checking for schema updates...
+    "%MYSQL%" --port=3307 --host=127.0.0.1 -u root < "%UPGRADESQL%" >> "%LOG%" 2>&1
+    if errorlevel 1 (
+        call :log "ERROR: schema upgrade failed"
+        echo Database update failed. See install.log for details.
+        exit /b 1
+    )
+    call :log "schema upgrade applied"
+)
+
 rem ---- 4. Confirm the import really produced the tables ----
 set "TABLES="
 "%MYSQL%" --port=3307 --host=127.0.0.1 -u root -N -B -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'employee_information_system'" > "%TMPOUT%" 2>>"%LOG%"

@@ -4,10 +4,65 @@
 
 declare(strict_types=1);
 
+/**
+ * Working days in a month, used to derive the daily salary. Saturdays and
+ * Sundays are excluded, so a month counts as 22 working days.
+ */
+const WORKING_DAYS_PER_MONTH = 22;
+
+/**
+ * Employee text columns stored in upper case, matching how the fields are
+ * typed on the printed information form. Deliberately excluded: email,
+ * contact numbers, government ID numbers and anything numeric.
+ */
+const UPPERCASE_FIELDS = [
+    'employee_no', 'first_name', 'middle_name', 'last_name',
+    'birthplace', 'address', 'emergency_contact_name', 'position',
+];
+
 /** HTML-escape a value for safe output. */
 function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+/** Upper-case a free-text value; null and blanks stay as they are. */
+function upper_text(?string $value): ?string
+{
+    $value = $value === null ? null : trim($value);
+    return ($value === null || $value === '') ? null : mb_strtoupper($value, 'UTF-8');
+}
+
+/** Upper-case every UPPERCASE_FIELDS entry present in a row of employee data. */
+function upper_employee_fields(array $row): array
+{
+    foreach (UPPERCASE_FIELDS as $field) {
+        if (array_key_exists($field, $row)) {
+            $row[$field] = upper_text($row[$field] === null ? null : (string)$row[$field]);
+        }
+    }
+    return $row;
+}
+
+/**
+ * Daily salary derived from a monthly salary, rounded to centavos.
+ * Returns null when no monthly salary is on record.
+ */
+function daily_salary(int|float|string|null $monthly): ?float
+{
+    if ($monthly === null || $monthly === '' || !is_numeric($monthly)) {
+        return null;
+    }
+    return round((float)$monthly / WORKING_DAYS_PER_MONTH, 2);
+}
+
+/** Format an amount as pesos (₱10,000.00), or an em dash when unset. */
+function peso(int|float|string|null $amount): string
+{
+    if ($amount === null || $amount === '' || !is_numeric($amount)) {
+        return '—';
+    }
+    return '₱' . number_format((float)$amount, 2);
 }
 
 /** Redirect to a path relative to BASE_URL and stop the script. */

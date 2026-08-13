@@ -125,6 +125,13 @@ require __DIR__ . '/../../includes/header.php';
             <tr><td class="text-muted">Applicant Type</td><td><?= e($emp['applicant_type']) ?></td></tr>
             <tr><td class="text-muted">Employment Status</td><td><?= e($emp['employment_status']) ?></td></tr>
             <tr><td class="text-muted">Date Hired</td><td><?= $emp['date_hired'] ? e(date('F j, Y', strtotime($emp['date_hired']))) : '—' ?></td></tr>
+            <tr><td class="text-muted">Monthly Salary</td><td class="fw-semibold"><?= e(peso($emp['monthly_salary'])) ?></td></tr>
+            <tr>
+                <td class="text-muted">Daily Salary</td>
+                <td><?= e(peso(daily_salary($emp['monthly_salary']))) ?>
+                    <span class="text-muted small">(÷ <?= WORKING_DAYS_PER_MONTH ?> working days)</span>
+                </td>
+            </tr>
         </table>
 
         <h3 class="h6 text-uppercase border-bottom pb-2">Requirements Checklist</h3>

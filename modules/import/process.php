@@ -29,6 +29,7 @@ $import_columns = [
     'elig_professional', 'elig_sub_professional', 'elig_ra1080',
     'emergency_contact_name', 'emergency_contact_no',
     'department_id', 'position', 'applicant_type', 'employment_status', 'date_hired',
+    'monthly_salary',
 ];
 $emp_insert = $pdo->prepare(
     'INSERT INTO employees (' . implode(',', $import_columns) . ') VALUES ('
@@ -96,6 +97,7 @@ try {
             $row['applicant_type'],
             $row['employment_status'],
             $row['date_hired'],
+            $row['monthly_salary'],
         ]);
         sync_requirements($pdo, (int)$pdo->lastInsertId());
         $imported++;

@@ -18,9 +18,10 @@ if (isset($_GET['template'])) {
                 'Solo Parent', 'IP', 'PWD', 'Smoker',
                 'Professional', 'Sub-Professional', 'RA 1080',
                 'Emergency Contact Name', 'Emergency Contact Number',
-                'Department', 'Position', 'Applicant Type', 'Employment Status', 'Date Hired'];
+                'Department', 'Position', 'Applicant Type', 'Employment Status', 'Date Hired',
+                'Monthly Salary'];
     $sheet->fromArray($headers, null, 'A1');
-    $sheet->getStyle('A1:AF1')->getFont()->setBold(true);
+    $sheet->getStyle('A1:AG1')->getFont()->setBold(true);
     $sheet->fromArray(['JB-0001', 'Juan', 'Santos', 'Dela Cruz', '1998-05-14', 'Tupi, South Cotabato',
                        'Male', 'Single', '09171234567', 'juan@example.com', 'Poblacion, Tupi',
                        'O+', '170', '65',
@@ -28,17 +29,18 @@ if (isset($_GET['template'])) {
                        'No', 'No', 'No', 'Yes',
                        'Yes', 'No', 'No',
                        'Maria Dela Cruz', '09181234567',
-                       'Service Crew', 'Cashier', 'New', 'Applicant', ''], null, 'A2');
+                       'Service Crew', 'Cashier', 'New', 'Applicant', '', '10000'], null, 'A2');
 
     // Note row so the encoder knows how the checkbox columns work
     $sheet->setCellValue('A4', 'Note: For the checkbox columns (Solo Parent, IP, PWD, Smoker, Professional, '
-        . 'Sub-Professional, RA 1080) type Yes or No. Leave any column blank if the information is not available.');
+        . 'Sub-Professional, RA 1080) type Yes or No. Monthly Salary takes plain numbers (10000). '
+        . 'Leave any column blank if the information is not available.');
     $sheet->getStyle('A4')->getFont()->setItalic(true);
 
     foreach (range('A', 'Z') as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
-    foreach (['AA', 'AB', 'AC', 'AD', 'AE', 'AF'] as $col) {
+    foreach (['AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

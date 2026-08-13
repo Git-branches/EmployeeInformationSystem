@@ -1,7 +1,19 @@
-EMPLOYEE INFORMATION SYSTEM  1.0.0
+EMPLOYEE INFORMATION SYSTEM  1.1.0
 Developed by Rhon Jon G. Romero
 
 For Jollibee Tupi - National Highway, Brgy. Poblacion, Tupi
+
+WHAT IS NEW IN 1.1.0
+--------------------
+  * Names, addresses and other information-form entries are now typed and
+    saved in UPPER CASE automatically. Email addresses, contact numbers and
+    ID numbers are left exactly as entered.
+  * New Monthly Salary field on the employee form, with the Daily Salary
+    computed automatically as Monthly Salary / 22 working days. Both amounts
+    appear on the profile, the printed information form and the PDF.
+
+Installing over an existing copy keeps your records: the database is updated
+in place, never replaced.
 
 WHAT THIS INSTALLER DOES
 ------------------------

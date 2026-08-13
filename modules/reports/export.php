@@ -142,6 +142,9 @@ if (isset($_GET['form_id'])) {
         <tr><td class="lbl">Applicant Type</td><td>' . e($emp['applicant_type']) . '</td></tr>
         <tr><td class="lbl">Employment Status</td><td>' . e($emp['employment_status']) . '</td></tr>
         <tr><td class="lbl">Date Hired</td><td>' . ($emp['date_hired'] ? e(date('F j, Y', strtotime($emp['date_hired']))) : '—') . '</td></tr>
+        <tr><td class="lbl">Monthly Salary</td><td><strong>' . e(peso($emp['monthly_salary'])) . '</strong></td></tr>
+        <tr><td class="lbl">Daily Salary</td><td>' . e(peso(daily_salary($emp['monthly_salary'])))
+            . ' <span style="color:#666">(&divide; ' . WORKING_DAYS_PER_MONTH . ' working days)</span></td></tr>
     </table>
     <h2>Requirements Checklist</h2>
     <table class="req">

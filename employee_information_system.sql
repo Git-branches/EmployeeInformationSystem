@@ -83,6 +83,11 @@ CREATE TABLE employees (
   applicant_type    ENUM('New','Existing') NOT NULL DEFAULT 'New',
   employment_status ENUM('Applicant','Active','Inactive','Terminated') NOT NULL DEFAULT 'Applicant',
   date_hired        DATE         NULL,
+
+  -- Compensation. Only the monthly salary is stored; the daily salary is
+  -- always derived as monthly_salary / 22 working days.
+  monthly_salary    DECIMAL(12,2) NULL COMMENT 'Philippine pesos',
+
   created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (employee_id),

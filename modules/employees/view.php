@@ -164,6 +164,18 @@ require __DIR__ . '/../../includes/header.php';
 
                 <hr>
                 <div class="row g-3">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="text-muted small">Monthly Salary</div>
+                        <div class="fw-semibold"><?= e(peso($emp['monthly_salary'])) ?></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="text-muted small">Daily Salary <span class="fst-italic">(÷ <?= WORKING_DAYS_PER_MONTH ?> working days)</span></div>
+                        <div class="fw-semibold"><?= e(peso(daily_salary($emp['monthly_salary']))) ?></div>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row g-3">
                     <div class="col-md-6">
                         <div class="text-muted small mb-1">Personal Status</div>
                         <?php if ($personal_status): ?>

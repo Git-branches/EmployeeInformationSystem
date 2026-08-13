@@ -14,7 +14,7 @@
 
 #define AppName        "Employee Information System"
 #define AppShortName   "EIS"
-#define AppVersion     "1.0.0"
+#define AppVersion     "1.1.0"
 #define Developer      "Rhon Jon G. Romero"
 #define AppPublisher   Developer
 #define AppCompany     "Jollibee Tupi"
