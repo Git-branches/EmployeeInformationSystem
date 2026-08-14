@@ -62,6 +62,12 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
             <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>/modules/auth/change_password.php">
+                    <i class="bi bi-shield-lock me-1"></i>Change Password
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
                 <a class="dropdown-item" href="<?= BASE_URL ?>/modules/auth/logout.php">
                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                 </a>

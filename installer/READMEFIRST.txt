@@ -10,6 +10,8 @@ WHAT IS NEW IN 1.1.0
   * New Monthly Salary field on the employee form, with the Daily Salary
     computed automatically as Monthly Salary / 22 working days. Both amounts
     appear on the profile, the printed information form and the PDF.
+  * The administrator can now change their own password from inside the
+    system: click your name at the top right, then "Change Password".
 
 Installing over an existing copy keeps your records: the database is updated
 in place, never replaced.
@@ -40,7 +42,10 @@ Default administrator account:
     Username: admin
     Password: admin123
 
-IMPORTANT: change this password after the first login.
+IMPORTANT: change this password immediately after the first login. Click
+your name at the top right of the screen, then "Change Password". The
+system holds personal information about your employees, so it must not be
+left on the password printed above.
 
 STOPPING THE SYSTEM
 -------------------
