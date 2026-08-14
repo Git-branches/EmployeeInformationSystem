@@ -1,5 +1,4 @@
 EMPLOYEE INFORMATION SYSTEM  1.1.0
-Developed by Rhon Jon G. Romero
 
 For Jollibee Tupi - National Highway, Brgy. Poblacion, Tupi
 

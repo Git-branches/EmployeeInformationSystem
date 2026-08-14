@@ -1,6 +1,5 @@
-EMPLOYEE INFORMATION SYSTEM 1.0.0 - TERMS OF USE
-Developed by Rhon Jon G. Romero
-Copyright (C) 2026 Rhon Jon G. Romero. All rights reserved.
+EMPLOYEE INFORMATION SYSTEM 1.1.0 - TERMS OF USE
+Copyright (C) 2026. All rights reserved.
 
 1. PURPOSE
    This software manages employee and applicant records for Jollibee Tupi,

@@ -15,8 +15,7 @@
 #define AppName        "Employee Information System"
 #define AppShortName   "EIS"
 #define AppVersion     "1.1.0"
-#define Developer      "Rhon Jon G. Romero"
-#define AppPublisher   Developer
+#define AppPublisher   AppName
 #define AppCompany     "Jollibee Tupi"
 #define AppYear        "2026"
 #define AppURL         "http://localhost:8080/"
@@ -30,12 +29,12 @@ AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppPublisher}
 AppComments=Centralized employee records, requirements monitoring and reporting for {#AppCompany}
-AppCopyright=Copyright (C) {#AppYear} {#Developer}
+AppCopyright=Copyright (C) {#AppYear} {#AppPublisher}
 ; Shown under right-click > Properties > Details on the setup file itself
 VersionInfoVersion={#AppVersion}
-VersionInfoCompany={#Developer}
+VersionInfoCompany={#AppPublisher}
 VersionInfoDescription={#AppName} Setup
-VersionInfoCopyright=Copyright (C) {#AppYear} {#Developer}
+VersionInfoCopyright=Copyright (C) {#AppYear} {#AppPublisher}
 VersionInfoProductName={#AppName}
 VersionInfoProductVersion={#AppVersion}
 DefaultDirName={autopf}\{#AppName}
@@ -217,20 +216,19 @@ end;
 
 { ------------------------------------------------------------ wizard flow }
 
-{ Developer credit on the welcome and finished pages of the wizard. }
+{ Product name and version on the finished page of the wizard. }
 procedure CurPageChanged(CurPageID: Integer);
 begin
   if CurPageID = wpFinished then
     WizardForm.FinishedLabel.Caption :=
       WizardForm.FinishedLabel.Caption + #13#10#13#10 +
-      '{#AppName} {#AppVersion}' + #13#10 +
-      'Developed by {#Developer}';
+      '{#AppName} {#AppVersion}';
 end;
 
 procedure InitializeWizard;
 begin
-  { A quiet credit line at the bottom of every wizard page }
-  WizardForm.BeveledLabel.Caption := '  {#AppName} {#AppVersion}  ·  Developed by {#Developer}  ';
+  { A quiet product line at the bottom of every wizard page }
+  WizardForm.BeveledLabel.Caption := '  {#AppName} {#AppVersion}  ';
 
   DataPage := CreateInputOptionPage(wpSelectTasks,
     'Existing data', 'What should happen to employee records if you uninstall?',
