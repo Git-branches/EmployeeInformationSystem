@@ -2,9 +2,9 @@ EMPLOYEE INFORMATION SYSTEM 1.1.0 - TERMS OF USE
 Copyright (C) 2026. All rights reserved.
 
 1. PURPOSE
-   This software manages employee and applicant records for Jollibee Tupi,
-   National Highway, Brgy. Poblacion, Tupi. It is provided for the use of
-   the authorised administrators of that establishment.
+   This software manages employee and applicant records: personal details,
+   submitted requirements, reports and backups. It is provided for the use
+   of the authorised administrators of the organisation that installs it.
 
 2. DATA PRIVACY
    The system stores personal information of employees and applicants.
@@ -34,13 +34,11 @@ Copyright (C) 2026. All rights reserved.
    developers are not liable for data loss or damages arising from its use.
    Regular backups are the responsibility of the operator.
 
-5. TRADEMARKS AND VISUAL IDENTITY
-   This software has its own visual identity. It does not use the logo,
-   colour scheme, imagery or any other branding of Jollibee Foods
-   Corporation. The name "Jollibee Tupi" appears only as the name of the
-   establishment whose employee records the system manages. "Jollibee" is
-   a trademark of Jollibee Foods Corporation. This software is not an
-   official Jollibee Foods Corporation product and is not endorsed by or
-   affiliated with it.
+5. VISUAL IDENTITY
+   This software has its own name, colour scheme and icon. It does not use
+   the logo, imagery or branding of any other company, and is not an
+   official product of, endorsed by, or affiliated with any of them. An
+   organisation name entered by the operator in the settings appears only
+   as a heading on the printed information form.
 
 By continuing with this installation you acknowledge these terms.

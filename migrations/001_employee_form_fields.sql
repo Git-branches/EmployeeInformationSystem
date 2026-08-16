@@ -1,7 +1,7 @@
 -- =============================================================
 -- Migration 001 — Employee Information Form fields
 -- Adds the personal, government ID, status, eligibility and
--- emergency-contact fields used by the Jollibee Tupi form.
+-- emergency-contact fields used by the employee information form.
 --
 -- Safe to run on a database that already contains employees:
 -- every new column is optional (NULL) or defaults to unchecked.

@@ -1,6 +1,6 @@
 EMPLOYEE INFORMATION SYSTEM  1.1.0
 
-For Jollibee Tupi - National Highway, Brgy. Poblacion, Tupi
+Employee and applicant records, requirements monitoring, reports and backups.
 
 WHAT IS NEW IN 1.1.0
 --------------------

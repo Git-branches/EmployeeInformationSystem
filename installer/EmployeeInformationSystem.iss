@@ -16,7 +16,6 @@
 #define AppShortName   "EIS"
 #define AppVersion     "1.1.0"
 #define AppPublisher   AppName
-#define AppCompany     "Jollibee Tupi"
 #define AppYear        "2026"
 #define AppURL         "http://localhost:8080/"
 #define AppExe         "eis-launch.vbs"
@@ -28,7 +27,7 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppPublisher}
-AppComments=Centralized employee records, requirements monitoring and reporting for {#AppCompany}
+AppComments=Centralized employee records, requirements monitoring and reporting
 AppCopyright=Copyright (C) {#AppYear} {#AppPublisher}
 ; Shown under right-click > Properties > Details on the setup file itself
 VersionInfoVersion={#AppVersion}

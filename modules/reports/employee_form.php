@@ -45,8 +45,12 @@ require __DIR__ . '/../../includes/header.php';
 <div class="card shadow-sm mx-auto" style="max-width:850px">
     <div class="card-body p-5">
         <div class="text-center border-bottom pb-3 mb-4">
-            <h2 class="h4 mb-0"><?= e(APP_COMPANY) ?></h2>
-            <div class="text-muted">National Highway Brgy. Poblacion Tupi</div>
+            <?php if (APP_COMPANY !== ''): ?>
+                <h2 class="h4 mb-0"><?= e(APP_COMPANY) ?></h2>
+            <?php endif; ?>
+            <?php if (APP_ADDRESS !== ''): ?>
+                <div class="text-muted"><?= e(APP_ADDRESS) ?></div>
+            <?php endif; ?>
             <div class="fw-bold mt-2 text-uppercase">Employee Information Form</div>
         </div>
 

@@ -22,8 +22,11 @@ Laragon/XAMPP/WAMP installation (which use 80 and 3306).
 ### One-time setup
 
 1. Install **Inno Setup 6** — <https://jrsoftware.org/isdl.php>
-2. Make sure a thread-safe PHP with `php8apache2_4.dll`, an Apache build and
-   a MySQL/MariaDB build are available (Laragon's `bin` folder is fine).
+2. Have **Laragon or XAMPP** installed. The build auto-detects either —
+   Laragon (`C:\laragon\bin\...`) first, then XAMPP (`C:\xampp\...`) — and
+   takes Apache, a thread-safe PHP with `php8apache2_4.dll`, and
+   MySQL/MariaDB from it. Neither has to be *running*; the build only reads
+   their files. Any other location can be passed with the switches below.
 
 ### Build
 
@@ -58,6 +61,62 @@ powershell -ExecutionPolicy Bypass -File build.ps1 `
    credential file would be shipped. The build fails rather than produce a
    broken or leaky installer.
 5. Compiles with Inno Setup.
+
+## Updating the installer after changing the application
+
+Rebuilding is the whole procedure — there is no separate "update package".
+`build.ps1` always copies the current state of the project, so the new
+`.exe` contains whatever is on disk at the moment you run it.
+
+```powershell
+cd C:\laragon\www\EmployeeInformationSystem
+powershell -ExecutionPolicy Bypass -File installer\build.ps1
+```
+
+Roughly four minutes. The result replaces
+`installer\dist\EmployeeInformationSystem_Setup.exe`.
+
+Before running it, two things are worth doing:
+
+**1. If the change touches the database schema, update it in two places.**
+`eis-dbsetup.bat` imports `employee_information_system.sql` *only when no
+database exists yet*, so an installation being upgraded never sees it. A new
+column therefore needs both:
+
+| File | Who it serves |
+|---|---|
+| `employee_information_system.sql` | fresh installs |
+| `migrations/upgrade.sql` | **existing installs** — add an idempotent block |
+
+Miss the second and the feature works on new machines but crashes on every
+upgraded one with "Unknown column". Copy the shape of the block already in
+`upgrade.sql`: it checks `information_schema` first, so it is safe to run
+repeatedly. A numbered `migrations/00N_*.sql` is still worth adding for
+developer databases.
+
+**2. Bump the version** in three places, so the client can tell the builds
+apart:
+
+- `EmployeeInformationSystem.iss` — `#define AppVersion`
+- `READMEFIRST.txt` — the title line
+- `LICENSE.txt` — the title line
+
+### Checking the change actually got in
+
+`build\` is wiped and re-staged on every run, so it always mirrors the new
+package. Inspect it before or instead of compiling:
+
+```powershell
+# stage only, no compile (about one minute)
+powershell -ExecutionPolicy Bypass -File installer\build.ps1 -StageOnly
+
+# then confirm your edit is really in the package
+Select-String -Path installer\build\www\modules\employees\form.php -Pattern 'monthly_salary'
+```
+
+If the build stops with `LEAK`, `MISSING` or an extension error, it produced
+nothing and the previous `.exe` in `dist\` is untouched — fix the cause and
+run it again.
 
 ## What the installer does on the target PC
 

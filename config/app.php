@@ -7,7 +7,15 @@
 declare(strict_types=1);
 
 define('APP_NAME', 'Employee Information System');
-define('APP_COMPANY', 'Jollibee Tupi');
+
+/**
+ * Optional organisation name and address, printed as the letterhead of the
+ * Employee Information Form (screen and PDF). Both are blank by default —
+ * the form then carries its own title alone. Fill them in to put an
+ * establishment's name on the printed record.
+ */
+define('APP_COMPANY', '');
+define('APP_ADDRESS', '');
 
 // Absolute filesystem paths
 define('ROOT_PATH', dirname(__DIR__));

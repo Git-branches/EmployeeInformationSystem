@@ -38,14 +38,16 @@ function Find-First([string[]]$patterns, [string]$mustContain) {
     return $null
 }
 
+# Laragon first, then XAMPP, so the build works on either stack without
+# having to pass -ApacheSource / -PhpSource / -DbSource by hand.
 if (-not $ApacheSource) {
-    $ApacheSource = Find-First @('C:\laragon\bin\apache\*') 'bin\httpd.exe'
+    $ApacheSource = Find-First @('C:\laragon\bin\apache\*', 'C:\xampp\apache') 'bin\httpd.exe'
 }
 if (-not $PhpSource) {
-    $PhpSource = Find-First @('C:\laragon\bin\php\*') 'php8apache2_4.dll'
+    $PhpSource = Find-First @('C:\laragon\bin\php\*', 'C:\xampp\php') 'php8apache2_4.dll'
 }
 if (-not $DbSource) {
-    $DbSource = Find-First @('C:\laragon\bin\mariadb\*', 'C:\laragon\bin\mysql\*') 'bin\mysqld.exe'
+    $DbSource = Find-First @('C:\laragon\bin\mariadb\*', 'C:\laragon\bin\mysql\*', 'C:\xampp\mysql') 'bin\mysqld.exe'
 }
 
 if (-not $ApacheSource) { Fail 'Apache not found. Pass -ApacheSource "C:\path\to\httpd-x.y".' }

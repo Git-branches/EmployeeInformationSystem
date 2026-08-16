@@ -1,6 +1,5 @@
 -- =============================================================
 -- Employee Information System — Database Schema
--- Jollibee Tupi (Brgy. Poblacion, Tupi)
 -- Engine: MySQL (InnoDB) | Charset: utf8mb4
 -- =============================================================
 

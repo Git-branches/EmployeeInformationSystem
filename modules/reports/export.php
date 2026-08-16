@@ -78,6 +78,10 @@ if (isset($_GET['form_id'])) {
               'elig_ra1080' => 'RA 1080'] as $k => $label) {
         $elig_rows .= '<div>' . $box(!empty($emp[$k])) . ' ' . e($label) . '</div>';
     }
+    // Letterhead, printed only when an organisation is configured (config/app.php)
+    $letterhead = (APP_COMPANY !== '' ? '<h1>' . e(APP_COMPANY) . '</h1>' : '')
+                . (APP_ADDRESS !== '' ? '<div class="sub">' . e(APP_ADDRESS) . '</div>' : '');
+
     $html = '
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
@@ -95,8 +99,7 @@ if (isset($_GET['form_id'])) {
         .sig .line { border-top: 1px solid #222; margin: 0 40px; padding-top: 3px; }
         .foot { color: #888; font-size: 10px; margin-top: 30px; }
     </style>
-    <h1>' . e(APP_COMPANY) . '</h1>
-    <div class="sub">National Highway Brgy. Poblacion Tupi</div>
+    ' . $letterhead . '
     <div class="form-title">Employee Information Form</div>
     <table width="100%"><tr>
         <td>
@@ -227,7 +230,7 @@ $html = '
     th, td { border: 1px solid #999; padding: 3px 5px; text-align: left; }
     th { background: #c8102e; color: #fff; }
 </style>
-<h1>' . e(APP_COMPANY) . ' — ' . e($title) . '</h1>
+<h1>' . (APP_COMPANY !== '' ? e(APP_COMPANY) . ' — ' : '') . e($title) . '</h1>
 <div class="sub">Generated ' . e(date('F j, Y g:i A')) . ' · ' . count($rows) . ' record(s)</div>
 <table>
     <tr><th>Emp No</th><th>Name</th><th>Birthdate</th><th>Sex</th><th>Contact</th><th>Department</th>

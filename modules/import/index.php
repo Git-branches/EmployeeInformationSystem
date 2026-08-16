@@ -22,8 +22,8 @@ if (isset($_GET['template'])) {
                 'Monthly Salary'];
     $sheet->fromArray($headers, null, 'A1');
     $sheet->getStyle('A1:AG1')->getFont()->setBold(true);
-    $sheet->fromArray(['JB-0001', 'Juan', 'Santos', 'Dela Cruz', '1998-05-14', 'Tupi, South Cotabato',
-                       'Male', 'Single', '09171234567', 'juan@example.com', 'Poblacion, Tupi',
+    $sheet->fromArray(['EMP-0001', 'Juan', 'Santos', 'Dela Cruz', '1998-05-14', 'Sample City',
+                       'Male', 'Single', '09171234567', 'juan@example.com', '123 Sample Street, Sample City',
                        'O+', '170', '65',
                        '34-1234567-8', '12-345678901-2', '1234-5678-9012', '123-456-789-000',
                        'No', 'No', 'No', 'Yes',
