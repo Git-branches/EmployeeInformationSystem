@@ -49,6 +49,7 @@ $pending_list = $pdo->query(
 )->fetchAll();
 
 $page_title = 'Dashboard';
+$storage = storage_stats();
 require __DIR__ . '/../../includes/header.php';
 ?>
 <h1 class="h3 mb-1"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
@@ -137,6 +138,34 @@ require __DIR__ . '/../../includes/header.php';
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-hdd me-1"></i>Storage Capacity
+        <span class="text-muted fw-normal small">— photos stored as files, DB keeps path only</span>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-sm-3">
+                <div class="fs-5 fw-bold"><?= (int)$storage['files'] ?></div>
+                <div class="small text-muted">Photos stored (<?= e(format_bytes($storage['used'])) ?> used)</div>
+            </div>
+            <div class="col-sm-3">
+                <div class="fs-5 fw-bold"><?= e(format_bytes($storage['free'])) ?></div>
+                <div class="small text-muted">Free disk space</div>
+            </div>
+            <div class="col-sm-3">
+                <div class="fs-5 fw-bold">~<?= number_format((int)$storage['fits_typical']) ?></div>
+                <div class="small text-muted">More photos fit at ~500 KB avg</div>
+            </div>
+            <div class="col-sm-3">
+                <div class="fs-5 fw-bold">~<?= number_format((int)$storage['fits_max']) ?></div>
+                <div class="small text-muted">More photos fit at 2 MB max</div>
+            </div>
+        </div>
+        <p class="small text-muted mb-0 mt-2">Max 2 MB per photo (JPG/PNG). Total capacity grows with disk space.</p>
     </div>
 </div>
 <?php require __DIR__ . '/../../includes/footer.php'; ?>

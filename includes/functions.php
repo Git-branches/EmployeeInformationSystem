@@ -221,3 +221,47 @@ function get_unread_notifications(PDO $pdo): array
     )->fetchAll();
     return [$count, $latest];
 }
+
+/**
+ * Read-only storage overview for the dashboard card.
+ * Never throws: on failure returns zeros so the UI shows dashes.
+ */
+function storage_stats(): array
+{
+    $photos_dir = UPLOAD_PATH . '/photos';
+    $used = 0;
+    $files = 0;
+    foreach (glob($photos_dir . '/*') ?: [] as $f) {
+        if (is_file($f)) {
+            $files++;
+            $size = @filesize($f);
+            $used += $size === false ? 0 : $size;
+        }
+    }
+    $free = @disk_free_space(ROOT_PATH);
+    $total = @disk_total_space(ROOT_PATH);
+    return [
+        'used' => $used,
+        'files' => $files,
+        'free' => $free === false ? 0 : (int)$free,
+        'total' => $total === false ? 0 : (int)$total,
+        // Rough capacity at typical (500 KB) and max (2 MB) photo sizes.
+        'fits_typical' => $free === false ? 0 : (int)floor(((int)$free) / (500 * 1024)),
+        'fits_max' => $free === false ? 0 : (int)floor(((int)$free) / (2 * 1024 * 1024)),
+    ];
+}
+
+/** Format bytes as KB/MB/GB, or an em dash when unknown. */
+function format_bytes(int $bytes): string
+{
+    if ($bytes <= 0) {
+        return '—';
+    }
+    if ($bytes < 1024 * 1024) {
+        return number_format($bytes / 1024, 1) . ' KB';
+    }
+    if ($bytes < 1024 * 1024 * 1024) {
+        return number_format($bytes / (1024 * 1024), 1) . ' MB';
+    }
+    return number_format($bytes / (1024 * 1024 * 1024), 2) . ' GB';
+}
