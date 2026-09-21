@@ -38,13 +38,13 @@ $total_people = max(1, array_sum(array_column($by_status, 'total')));
 $status_colors = ['Applicant' => 'bg-warning', 'Active' => 'bg-success', 'Inactive' => 'bg-secondary', 'Terminated' => 'bg-dark'];
 
 $pending_list = $pdo->query(
-    "SELECT e.employee_id, e.first_name, e.last_name, d.department_name,
+    "SELECT e.employee_id, e.first_name, e.middle_name, e.no_middle_name, e.last_name, e.name_extension, d.department_name,
             SUM(er.status IN ('Missing','Incomplete')) AS pending
      FROM employees e
      LEFT JOIN departments d ON d.department_id = e.department_id
      JOIN employee_requirements er ON er.employee_id = e.employee_id
      JOIN requirement_types rt ON rt.requirement_type_id = er.requirement_type_id AND rt.is_active = 1
-     GROUP BY e.employee_id, e.first_name, e.last_name, d.department_name
+     GROUP BY e.employee_id, e.first_name, e.middle_name, e.no_middle_name, e.last_name, e.name_extension, d.department_name
      HAVING pending > 0 ORDER BY pending DESC LIMIT 8"
 )->fetchAll();
 
@@ -125,7 +125,7 @@ require __DIR__ . '/../../includes/header.php';
                         <tr>
                             <td>
                                 <a href="<?= BASE_URL ?>/modules/employees/view.php?id=<?= (int)$p['employee_id'] ?>" class="text-decoration-none">
-                                    <?= e($p['last_name'] . ', ' . $p['first_name']) ?>
+                                    <?= e(employee_display_name($p)) ?>
                                 </a>
                                 <div class="small text-muted"><?= e($p['department_name'] ?? 'Unassigned') ?></div>
                             </td>

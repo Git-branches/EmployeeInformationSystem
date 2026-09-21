@@ -18,6 +18,8 @@ $rows = $import['rows'];
 
 $dept_lookup = $pdo->prepare('SELECT department_id FROM departments WHERE LOWER(department_name) = LOWER(?)');
 $dept_insert = $pdo->prepare('INSERT INTO departments (department_name) VALUES (?)');
+$pos_lookup  = $pdo->prepare('SELECT position_id, position_name FROM positions WHERE LOWER(position_name) = LOWER(?)');
+$pos_insert  = $pdo->prepare('INSERT INTO positions (position_name) VALUES (?)');
 
 // Columns filled from an imported row, in the order used below.
 $import_columns = [
@@ -28,7 +30,7 @@ $import_columns = [
     'is_solo_parent', 'is_ip', 'is_pwd', 'is_smoker',
     'elig_professional', 'elig_sub_professional', 'elig_ra1080',
     'emergency_contact_name', 'emergency_contact_no',
-    'department_id', 'position', 'applicant_type', 'employment_status', 'date_hired',
+    'department_id', 'position_id', 'position', 'applicant_type', 'employment_status', 'date_hired',
     'monthly_salary',
 ];
 $emp_insert = $pdo->prepare(
@@ -64,6 +66,25 @@ try {
             }
         }
 
+        // Resolve (or create) the position by name, like the department
+        $position_id = null;
+        $position    = upper_text(preg_replace('/\s+/', ' ', (string)($row['position'] ?? '')));
+        if ($position !== null) {
+            $pos_lookup->execute([$position]);
+            $found = $pos_lookup->fetch();
+            if ($found) {
+                $position_id = (int)$found['position_id'];
+                $position    = $found['position_name'];
+            } else {
+                $pos_insert->execute([$position]);
+                $position_id = (int)$pdo->lastInsertId();
+            }
+        }
+
+        // Mobile numbers in the standard 0994-800-7500 form; anything else as given
+        $contact_no = $val($row, 'contact_no');
+        $contact_no = format_ph_mobile($contact_no) ?? $contact_no;
+
         $emp_insert->execute([
             $row['employee_no'],
             $row['first_name'],
@@ -76,7 +97,7 @@ try {
             $row['blood_type'] ?? null,
             $row['height_cm'] ?? null,
             $row['weight_kg'] ?? null,
-            $val($row, 'contact_no'),
+            $contact_no,
             $val($row, 'email'),
             $val($row, 'address'),
             $val($row, 'sss_no'),
@@ -93,7 +114,8 @@ try {
             $val($row, 'emergency_contact_name'),
             $val($row, 'emergency_contact_no'),
             $department_id,
-            $val($row, 'position'),
+            $position_id,
+            $position,
             $row['applicant_type'],
             $row['employment_status'],
             $row['date_hired'],

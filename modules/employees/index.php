@@ -129,7 +129,7 @@ require __DIR__ . '/../../includes/header.php';
                             <?php else: ?>
                                 <i class="bi bi-person-circle fs-3 text-secondary"></i>
                             <?php endif; ?>
-                            <span class="fw-semibold"><?= e($emp['last_name'] . ', ' . $emp['first_name']) ?></span>
+                            <span class="fw-semibold"><?= e(employee_display_name($emp)) ?></span>
                         </div>
                     </td>
                     <td><?= e($emp['employee_no'] ?? '—') ?></td>
@@ -154,7 +154,7 @@ require __DIR__ . '/../../includes/header.php';
                         <a href="view.php?id=<?= (int)$emp['employee_id'] ?>" class="btn btn-sm btn-outline-secondary" title="View"><i class="bi bi-eye"></i></a>
                         <a href="edit.php?id=<?= (int)$emp['employee_id'] ?>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form method="post" action="delete.php" class="d-inline"
-                              data-confirm="Delete <?= e($emp['first_name'] . ' ' . $emp['last_name']) ?>? This also removes their requirements records.">
+                              data-confirm="Delete <?= e(employee_display_name($emp)) ?>? This also removes their requirements records.">
                             <?= csrf_field() ?>
                             <input type="hidden" name="employee_id" value="<?= (int)$emp['employee_id'] ?>">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>

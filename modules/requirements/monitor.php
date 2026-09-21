@@ -10,7 +10,7 @@ generate_notifications($pdo);
 $filter = (string)($_GET['show'] ?? 'pending');
 
 $rows = $pdo->query(
-    "SELECT e.employee_id, e.first_name, e.last_name, e.employment_status,
+    "SELECT e.employee_id, e.first_name, e.middle_name, e.no_middle_name, e.last_name, e.name_extension, e.employment_status,
             d.department_name,
             COUNT(er.employee_requirement_id) AS total,
             SUM(er.status = 'Verified')  AS verified,
@@ -20,7 +20,7 @@ $rows = $pdo->query(
      LEFT JOIN departments d ON d.department_id = e.department_id
      LEFT JOIN employee_requirements er ON er.employee_id = e.employee_id
      LEFT JOIN requirement_types rt ON rt.requirement_type_id = er.requirement_type_id AND rt.is_active = 1
-     GROUP BY e.employee_id, e.first_name, e.last_name, e.employment_status, d.department_name
+     GROUP BY e.employee_id, e.first_name, e.middle_name, e.no_middle_name, e.last_name, e.name_extension, e.employment_status, d.department_name
      ORDER BY pending DESC, e.last_name"
 )->fetchAll();
 
@@ -65,7 +65,7 @@ require __DIR__ . '/../../includes/header.php';
                 $pct   = (int)round($done / $total * 100);
             ?>
                 <tr>
-                    <td class="fw-semibold"><?= e($r['last_name'] . ', ' . $r['first_name']) ?></td>
+                    <td class="fw-semibold"><?= e(employee_display_name($r)) ?></td>
                     <td><?= e($r['department_name'] ?? 'Unassigned') ?></td>
                     <td><span class="badge text-bg-secondary"><?= e($r['employment_status']) ?></span></td>
                     <td class="text-center">

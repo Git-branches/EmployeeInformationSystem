@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/auth_check.php';
 
 $employee_id = (int)($_GET['employee_id'] ?? $_POST['employee_id'] ?? 0);
 
-$stmt = $pdo->prepare('SELECT employee_id, first_name, last_name FROM employees WHERE employee_id = ?');
+$stmt = $pdo->prepare('SELECT employee_id, first_name, middle_name, no_middle_name, last_name, name_extension FROM employees WHERE employee_id = ?');
 $stmt->execute([$employee_id]);
 $emp = $stmt->fetch();
 
@@ -91,7 +91,7 @@ require __DIR__ . '/../../includes/header.php';
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">
         <i class="bi bi-card-checklist me-2"></i>Checklist:
-        <?= e($emp['first_name'] . ' ' . $emp['last_name']) ?>
+        <?= e(employee_display_name($emp)) ?>
     </h1>
     <a href="<?= BASE_URL ?>/modules/employees/view.php?id=<?= $employee_id ?>" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Back to profile

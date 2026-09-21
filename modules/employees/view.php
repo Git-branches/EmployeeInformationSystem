@@ -8,9 +8,10 @@ require_once __DIR__ . '/../../includes/auth_check.php';
 $id = (int)($_GET['id'] ?? 0);
 
 $stmt = $pdo->prepare(
-    'SELECT e.*, d.department_name
+    'SELECT e.*, d.department_name, s.status_name AS appointment_status
      FROM employees e
      LEFT JOIN departments d ON d.department_id = e.department_id
+     LEFT JOIN employment_statuses s ON s.employment_status_id = e.employment_status_id
      WHERE e.employee_id = ?'
 );
 $stmt->execute([$id]);
@@ -61,7 +62,7 @@ $eligibility = array_keys(array_filter([
     'RA 1080'          => $emp['elig_ra1080'],
 ]));
 
-$page_title = $emp['first_name'] . ' ' . $emp['last_name'];
+$page_title = employee_display_name($emp);
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -84,9 +85,12 @@ require __DIR__ . '/../../includes/header.php';
                 <?php else: ?>
                     <i class="bi bi-person-circle text-secondary" style="font-size:7rem"></i>
                 <?php endif; ?>
-                <h2 class="h5 mb-1"><?= e($emp['first_name'] . ' ' . ($emp['middle_name'] ? $emp['middle_name'] . ' ' : '') . $emp['last_name']) ?></h2>
+                <h2 class="h5 mb-1"><?= e(employee_display_name($emp)) ?></h2>
                 <div class="text-muted mb-2"><?= e($emp['position'] ?? 'No position') ?></div>
                 <span class="badge <?= $status_badge[$emp['employment_status']] ?>"><?= e($emp['employment_status']) ?></span>
+                <?php if ($emp['appointment_status']): ?>
+                    <span class="badge text-bg-light border"><?= e($emp['appointment_status']) ?></span>
+                <?php endif; ?>
                 <span class="badge <?= $emp['applicant_type'] === 'New' ? 'text-bg-info' : 'text-bg-primary' ?>"><?= e($emp['applicant_type']) ?> Applicant</span>
             </div>
             <ul class="list-group list-group-flush text-start">
@@ -160,10 +164,18 @@ require __DIR__ . '/../../includes/header.php';
                         <div class="text-muted small">TIN No.</div>
                         <div><?= e($emp['tin_no'] ?? '—') ?></div>
                     </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="text-muted small">GSIS No.</div>
+                        <div><?= e($emp['gsis_no'] ?? '—') ?></div>
+                    </div>
                 </div>
 
                 <hr>
                 <div class="row g-3">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="text-muted small">Employment Status</div>
+                        <div><?= e($emp['appointment_status'] ?? '—') ?></div>
+                    </div>
                     <div class="col-sm-6 col-lg-4">
                         <div class="text-muted small">Monthly Salary</div>
                         <div class="fw-semibold"><?= e(peso($emp['monthly_salary'])) ?></div>

@@ -42,7 +42,7 @@ document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
     const workingDays = parseInt(daily.dataset.workingDays, 10) || 22;
 
     function recalculate() {
-        const value = parseFloat(monthly.value);
+        const value = parseFloat(monthly.value.replace(/,/g, ''));
         daily.value = (isNaN(value) || value < 0)
             ? ''
             : (value / workingDays).toLocaleString('en-US', {
@@ -54,6 +54,192 @@ document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
     monthly.addEventListener('input', recalculate);
     // Run after autosave.js has restored any draft, so the two always agree.
     window.addEventListener('load', recalculate);
+})();
+
+// ---- Caret-preserving reformat ----------------------------------------------
+// Rewrites an input's value with format(value) while keeping the caret after
+// the same number of significant characters (digits, and the decimal point).
+function reformatKeepingCaret(field, format) {
+    const significant = /[0-9.]/;
+    const caret = field.selectionStart === null ? field.value.length : field.selectionStart;
+    let before = 0;
+    for (let i = 0; i < caret; i++) {
+        if (significant.test(field.value[i])) before++;
+    }
+    const formatted = format(field.value);
+    if (formatted === field.value) return;
+    field.value = formatted;
+    let pos = 0;
+    while (pos < formatted.length && before > 0) {
+        if (significant.test(formatted[pos])) before--;
+        pos++;
+    }
+    if (document.activeElement === field) field.setSelectionRange(pos, pos);
+}
+
+// ---- Money fields: 1,000.09 ---------------------------------------------------
+// Digits and one decimal point only, grouped with commas as typed and padded
+// to two decimals on leaving the field. The server strips the commas.
+(function () {
+    function group(value) {
+        let clean = value.replace(/[^0-9.]/g, '');
+        const dot = clean.indexOf('.');
+        let whole = dot === -1 ? clean : clean.slice(0, dot);
+        let cents = dot === -1 ? null : clean.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+        whole = whole.replace(/^0+(?=\d)/, '');
+        if (whole === '' && cents !== null) whole = '0';
+        whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return cents === null ? whole : whole + '.' + cents;
+    }
+    function finish(field) {
+        const number = parseFloat(field.value.replace(/,/g, ''));
+        if (field.value.trim() === '' || isNaN(number)) return;
+        field.value = number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    document.querySelectorAll('input[data-money]').forEach(function (field) {
+        field.addEventListener('input', function () { reformatKeepingCaret(field, group); });
+        field.addEventListener('blur', function () { finish(field); });
+        // After autosave.js has restored any draft
+        window.addEventListener('load', function () { finish(field); });
+    });
+})();
+
+// ---- Philippine mobile numbers: 0994-800-7500 --------------------------------
+// Only digits are kept; +63 / 63 becomes 0, and hyphens are inserted as the
+// number is typed. A number on file in another form (e.g. a landline) is left
+// alone until the user edits it.
+(function () {
+    function mask(value) {
+        let digits = value.replace(/\D/g, '');
+        if (digits.startsWith('63')) digits = '0' + digits.slice(2);
+        digits = digits.slice(0, 11);
+        if (digits.length <= 4) return digits;
+        if (digits.length <= 7) return digits.slice(0, 4) + '-' + digits.slice(4);
+        return digits.slice(0, 4) + '-' + digits.slice(4, 7) + '-' + digits.slice(7);
+    }
+    document.querySelectorAll('input[data-ph-mobile]').forEach(function (field) {
+        field.addEventListener('input', function () {
+            reformatKeepingCaret(field, mask);
+            field.classList.remove('is-invalid');
+            field.setCustomValidity('');
+        });
+        field.addEventListener('blur', function () {
+            const ok = field.value === '' || /^09\d{2}-\d{3}-\d{4}$/.test(field.value)
+                || field.value === field.defaultValue;
+            field.classList.toggle('is-invalid', !ok);
+            field.setCustomValidity(ok ? '' : 'Enter an 11-digit mobile number starting with 09, e.g. 0994-800-7500.');
+        });
+    });
+})();
+
+// ---- Employee name: "No middle name" and the display-name preview -----------
+// Mirrors employee_display_name() in includes/functions.php:
+// SURNAME, FIRST M. EXT  (e.g. ROMERO, RHON J. JR.)
+(function () {
+    const preview = document.getElementById('name-preview');
+    const noMiddle = document.getElementById('no_middle_name');
+    if (!preview || !noMiddle) return;
+    const get = function (id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim().replace(/\s+/g, ' ').toUpperCase() : '';
+    };
+    const middleField = document.getElementById('middle_name');
+
+    function render() {
+        const last = get('last_name');
+        const middle = noMiddle.checked ? '' : get('middle_name');
+        let ext = get('name_extension').replace(/\.+$/, '');
+        if (ext === 'JR' || ext === 'SR') ext += '.';
+
+        let given = get('first_name');
+        if (middle) given += ' ' + middle.charAt(0) + '.';
+        if (ext) given += ' ' + ext;
+        given = given.trim();
+
+        const name = last && given ? last + ', ' + given : (last || given);
+        preview.textContent = name || '—';
+    }
+
+    function syncMiddle() {
+        middleField.disabled = noMiddle.checked;
+        if (noMiddle.checked) {
+            middleField.value = '';
+            middleField.classList.remove('is-invalid');
+        }
+        render();
+    }
+
+    ['last_name', 'first_name', 'middle_name', 'name_extension'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', render);
+    });
+    noMiddle.addEventListener('change', syncMiddle);
+    // After autosave.js has restored any draft
+    window.addEventListener('load', syncMiddle);
+})();
+
+// ---- Address: province → city/municipality → barangay ---------------------
+// Lower lists are loaded from locations.php whenever a higher one changes.
+(function () {
+    const box = document.getElementById('address-fields');
+    if (!box) return;
+    const url = box.dataset.locationsUrl;
+    const province = document.getElementById('address_province');
+    const town = document.getElementById('address_municipality');
+    const barangay = document.getElementById('address_barangay');
+
+    function fill(select, names, placeholder, wanted) {
+        select.innerHTML = '';
+        select.add(new Option(placeholder, ''));
+        names.forEach(function (name) { select.add(new Option(name, name)); });
+        select.disabled = names.length === 0;
+        if (wanted && names.indexOf(wanted) !== -1) select.value = wanted;
+        select.classList.remove('is-invalid');
+    }
+    function reset(select, text) {
+        select.innerHTML = '';
+        select.add(new Option(text, ''));
+        select.disabled = true;
+        select.classList.remove('is-invalid');
+    }
+    function load(params) {
+        return fetch(url + '?' + new URLSearchParams(params))
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .catch(function () { return []; });
+    }
+    function loadTowns(wantedTown, wantedBarangay) {
+        reset(barangay, 'Select a city/municipality first');
+        if (!province.value) { reset(town, 'Select a province first'); return; }
+        reset(town, 'Loading…');
+        load({ province: province.value }).then(function (names) {
+            fill(town, names, 'Select city/municipality…', wantedTown);
+            if (town.value) loadBarangays(wantedBarangay);
+        });
+    }
+    function loadBarangays(wanted) {
+        if (!town.value) { reset(barangay, 'Select a city/municipality first'); return; }
+        reset(barangay, 'Loading…');
+        load({ province: province.value, municipality: town.value }).then(function (names) {
+            fill(barangay, names, 'Select barangay…', wanted);
+        });
+    }
+
+    province.addEventListener('change', function () { loadTowns(); });
+    town.addEventListener('change', function () { loadBarangays(); });
+
+    // autosave.js can only restore a choice whose option is already on the
+    // page; bring back a draft's town and barangay once their lists load.
+    window.addEventListener('load', function () {
+        const form = box.closest('form[data-autosave]');
+        if (!form || !province.value || town.value) return;
+        let draft = null;
+        try {
+            draft = JSON.parse(localStorage.getItem('eis_autosave_' + form.dataset.autosave) || 'null');
+        } catch (e) { /* storage unavailable */ }
+        if (draft && draft.address_province === province.value && draft.address_municipality) {
+            loadTowns(draft.address_municipality, draft.address_barangay);
+        }
+    });
 })();
 
 // ---- Live notifications bell ------------------------------------------------

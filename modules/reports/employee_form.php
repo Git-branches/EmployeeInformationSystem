@@ -9,8 +9,9 @@ require_once __DIR__ . '/../../includes/auth_check.php';
 $id = (int)($_GET['id'] ?? 0);
 
 $stmt = $pdo->prepare(
-    'SELECT e.*, d.department_name FROM employees e
+    'SELECT e.*, d.department_name, s.status_name AS appointment_status FROM employees e
      LEFT JOIN departments d ON d.department_id = e.department_id
+     LEFT JOIN employment_statuses s ON s.employment_status_id = e.employment_status_id
      WHERE e.employee_id = ?'
 );
 $stmt->execute([$id]);
@@ -58,7 +59,7 @@ require __DIR__ . '/../../includes/header.php';
             <div class="col-9">
                 <table class="table table-sm table-borderless mb-0">
                     <tr><td class="text-muted" style="width:170px">Employee No.</td><td class="fw-semibold"><?= e($emp['employee_no'] ?? '—') ?></td></tr>
-                    <tr><td class="text-muted">Full Name</td><td class="fw-semibold"><?= e($emp['first_name'] . ' ' . ($emp['middle_name'] ? $emp['middle_name'] . ' ' : '') . $emp['last_name']) ?></td></tr>
+                    <tr><td class="text-muted">Full Name</td><td class="fw-semibold"><?= e(employee_display_name($emp)) ?></td></tr>
                     <tr><td class="text-muted">Birthday</td><td><?= e(date('F j, Y', strtotime($emp['birthdate']))) ?></td></tr>
                     <tr><td class="text-muted">Birthplace</td><td><?= e($emp['birthplace'] ?? '—') ?></td></tr>
                     <tr><td class="text-muted">Sex / Civil Status</td><td><?= e($emp['sex']) ?> / <?= e($emp['civil_status'] ?? '—') ?></td></tr>
@@ -94,6 +95,10 @@ require __DIR__ . '/../../includes/header.php';
                 <td class="text-muted">Pag-IBIG No.</td><td><?= e($emp['pagibig_no'] ?? '—') ?></td>
                 <td class="text-muted">TIN No.</td><td><?= e($emp['tin_no'] ?? '—') ?></td>
             </tr>
+            <tr>
+                <td class="text-muted">GSIS No.</td><td><?= e($emp['gsis_no'] ?? '—') ?></td>
+                <td></td><td></td>
+            </tr>
         </table>
 
         <div class="row mb-4">
@@ -127,7 +132,8 @@ require __DIR__ . '/../../includes/header.php';
             <tr><td class="text-muted" style="width:170px">Department</td><td><?= e($emp['department_name'] ?? 'Unassigned') ?></td></tr>
             <tr><td class="text-muted">Position</td><td><?= e($emp['position'] ?? '—') ?></td></tr>
             <tr><td class="text-muted">Applicant Type</td><td><?= e($emp['applicant_type']) ?></td></tr>
-            <tr><td class="text-muted">Employment Status</td><td><?= e($emp['employment_status']) ?></td></tr>
+            <tr><td class="text-muted">Employment Status</td><td><?= e($emp['appointment_status'] ?? '—') ?></td></tr>
+            <tr><td class="text-muted">Record Status</td><td><?= e($emp['employment_status']) ?></td></tr>
             <tr><td class="text-muted">Date Hired</td><td><?= $emp['date_hired'] ? e(date('F j, Y', strtotime($emp['date_hired']))) : '—' ?></td></tr>
             <tr><td class="text-muted">Monthly Salary</td><td class="fw-semibold"><?= e(peso($emp['monthly_salary'])) ?></td></tr>
             <tr>

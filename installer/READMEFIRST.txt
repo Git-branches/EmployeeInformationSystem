@@ -1,9 +1,23 @@
-EMPLOYEE INFORMATION SYSTEM  1.1.0
+EMPLOYEE INFORMATION SYSTEM  1.2.0
 
 Employee and applicant records, requirements monitoring, reports and backups.
 
-WHAT IS NEW IN 1.1.0
+WHAT IS NEW IN 1.2.0
 --------------------
+  * Employee name now has Surname, First Name, Middle Name (with a
+    "No middle name" box) and Extension, and is shown everywhere as
+    SURNAME, FIRST M. EXT. - for example ROMERO, RHON J. JR.
+  * CP Number is formatted automatically as 0994-800-7500 and must be a
+    valid mobile number.
+  * Address is split into Purok / Street (typed) and Province, City /
+    Municipality and Barangay (chosen from lists).
+  * New GSIS No. field beside the TIN.
+  * New Positions and Employment Status pages in the menu. The employee
+    form now picks Position and Employment Status from these lists.
+  * Monthly Salary is shown with commas and two decimals, e.g. 1,000.09.
+
+WHAT WAS NEW IN 1.1.0
+---------------------
   * Names, addresses and other information-form entries are now typed and
     saved in UPPER CASE automatically. Email addresses, contact numbers and
     ID numbers are left exactly as entered.

@@ -9,6 +9,8 @@ $menu = [
     ['label' => 'Dashboard',    'icon' => 'bi-speedometer2',       'href' => '/modules/dashboard/index.php',    'match' => '/modules/dashboard/'],
     ['label' => 'Employees',    'icon' => 'bi-people',             'href' => '/modules/employees/index.php',    'match' => '/modules/employees/'],
     ['label' => 'Departments',  'icon' => 'bi-diagram-3',          'href' => '/modules/departments/index.php',  'match' => '/modules/departments/'],
+    ['label' => 'Positions',    'icon' => 'bi-briefcase',          'href' => '/modules/positions/index.php',    'match' => '/modules/positions/'],
+    ['label' => 'Employment Status', 'icon' => 'bi-person-badge',  'href' => '/modules/employment_statuses/index.php', 'match' => '/modules/employment_statuses/'],
     ['label' => 'Import Data',  'icon' => 'bi-file-earmark-arrow-up', 'href' => '/modules/import/index.php',    'match' => '/modules/import/'],
     ['label' => 'Requirements', 'icon' => 'bi-card-checklist',     'href' => '/modules/requirements/monitor.php', 'match' => '/modules/requirements/'],
     ['label' => 'Reports',      'icon' => 'bi-file-earmark-text',  'href' => '/modules/reports/index.php',      'match' => '/modules/reports/'],

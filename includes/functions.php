@@ -16,8 +16,9 @@ const WORKING_DAYS_PER_MONTH = 22;
  * contact numbers, government ID numbers and anything numeric.
  */
 const UPPERCASE_FIELDS = [
-    'employee_no', 'first_name', 'middle_name', 'last_name',
-    'birthplace', 'address', 'emergency_contact_name', 'position',
+    'employee_no', 'first_name', 'middle_name', 'last_name', 'name_extension',
+    'birthplace', 'address', 'address_street', 'address_barangay',
+    'address_municipality', 'address_province', 'emergency_contact_name', 'position',
 ];
 
 /** HTML-escape a value for safe output. */
@@ -42,6 +43,100 @@ function upper_employee_fields(array $row): array
         }
     }
     return $row;
+}
+
+/**
+ * Name extension as printed: JR and SR get their period (JR.), others
+ * (II, III, IV ...) are left as typed. Null when blank.
+ */
+function normalize_name_extension(?string $ext): ?string
+{
+    $ext = upper_text($ext === null ? null : rtrim(trim($ext), '.'));
+    if ($ext === null) {
+        return null;
+    }
+    return in_array($ext, ['JR', 'SR'], true) ? $ext . '.' : $ext;
+}
+
+/**
+ * Display name from the separately stored name parts:
+ * "SURNAME, FIRST M. EXT" — e.g. ROMERO, RHON J. JR.
+ * The middle initial is left out when there is no middle name.
+ */
+function employee_display_name(array $emp): string
+{
+    $last   = trim((string)($emp['last_name'] ?? ''));
+    $first  = trim((string)($emp['first_name'] ?? ''));
+    $middle = empty($emp['no_middle_name']) ? trim((string)($emp['middle_name'] ?? '')) : '';
+    $ext    = trim((string)($emp['name_extension'] ?? ''));
+
+    $given = $first;
+    if ($middle !== '') {
+        $given .= ' ' . mb_strtoupper(mb_substr($middle, 0, 1, 'UTF-8'), 'UTF-8') . '.';
+    }
+    if ($ext !== '') {
+        $given .= ' ' . $ext;
+    }
+    $given = trim($given);
+
+    if ($last === '') {
+        return $given;
+    }
+    return $given === '' ? $last : $last . ', ' . $given;
+}
+
+/**
+ * Philippine mobile number in the standard 0994-800-7500 format.
+ * Accepts 09XXXXXXXXX, +639XXXXXXXXX or 639XXXXXXXXX with any spacing or
+ * punctuation. Returns null when the value is not a valid mobile number.
+ */
+function format_ph_mobile(?string $value): ?string
+{
+    $digits = preg_replace('/\D/', '', (string)$value);
+    if (preg_match('/^639\d{9}$/', $digits)) {
+        $digits = '0' . substr($digits, 2);
+    }
+    if (!preg_match('/^09\d{9}$/', $digits)) {
+        return null;
+    }
+    return substr($digits, 0, 4) . '-' . substr($digits, 4, 3) . '-' . substr($digits, 7);
+}
+
+/**
+ * Philippine provinces, cities/municipalities and barangays (PSGC) for the
+ * address dropdowns, loaded once per request.
+ */
+function ph_locations(): array
+{
+    static $data = null;
+    return $data ??= require ROOT_PATH . '/includes/data/ph_locations.php';
+}
+
+/** Cities/municipalities of a province (by name), as a list of names. */
+function ph_municipalities(string $province): array
+{
+    $data = ph_locations();
+    $code = array_search($province, $data['provinces'], true);
+    return $code === false ? [] : array_values($data['cities'][$code] ?? []);
+}
+
+/** Barangays of a city/municipality within a province (both by name). */
+function ph_barangays(string $province, string $municipality): array
+{
+    $data = ph_locations();
+    $code = array_search($province, $data['provinces'], true);
+    if ($code === false) {
+        return [];
+    }
+    $city = array_search($municipality, $data['cities'][$code] ?? [], true);
+    return $city === false ? [] : ($data['barangays'][$city] ?? []);
+}
+
+/** Full address line from its parts, skipping blanks: STREET, BARANGAY, TOWN, PROVINCE. */
+function compose_address(?string ...$parts): ?string
+{
+    $parts = array_filter(array_map(fn($p) => trim((string)$p), $parts), fn($p) => $p !== '');
+    return $parts ? implode(', ', $parts) : null;
 }
 
 /**

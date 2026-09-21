@@ -31,7 +31,8 @@ function report_rows(PDO $pdo, array $f): array
         $where[] = 'e.employment_status = ?';
         $params[] = $f['status'];
     }
-    $sql = 'SELECT e.employee_no, e.last_name, e.first_name, e.middle_name, e.birthdate, e.sex,
+    $sql = 'SELECT e.employee_no, e.last_name, e.first_name, e.middle_name, e.no_middle_name,
+                   e.name_extension, e.birthdate, e.sex,
                    e.contact_no, e.email, d.department_name, e.position,
                    e.applicant_type, e.employment_status, e.date_hired,
                    SUM(er.status IN ("Missing","Incomplete")) AS pending_reqs

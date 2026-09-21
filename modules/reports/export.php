@@ -28,8 +28,9 @@ function stream_pdf(string $html, string $filename, string $orientation = 'portr
 if (isset($_GET['form_id'])) {
     $id = (int)$_GET['form_id'];
     $stmt = $pdo->prepare(
-        'SELECT e.*, d.department_name FROM employees e
+        'SELECT e.*, d.department_name, s.status_name AS appointment_status FROM employees e
          LEFT JOIN departments d ON d.department_id = e.department_id
+         LEFT JOIN employment_statuses s ON s.employment_status_id = e.employment_status_id
          WHERE e.employee_id = ?'
     );
     $stmt->execute([$id]);
@@ -61,7 +62,7 @@ if (isset($_GET['form_id'])) {
         $req_rows = '<tr><td colspan="3">No requirements defined.</td></tr>';
     }
 
-    $full_name = $emp['first_name'] . ' ' . ($emp['middle_name'] ? $emp['middle_name'] . ' ' : '') . $emp['last_name'];
+    $full_name = employee_display_name($emp);
 
     // Checkbox glyphs for the printed form
     $box = fn($on) => $on ? '&#9745;' : '&#9744;';
@@ -125,6 +126,7 @@ if (isset($_GET['form_id'])) {
             <td class="lbl">PhilHealth No.</td><td>' . e($emp['philhealth_no'] ?? '—') . '</td></tr>
         <tr><td class="lbl">Pag-IBIG No.</td><td>' . e($emp['pagibig_no'] ?? '—') . '</td>
             <td class="lbl">TIN No.</td><td>' . e($emp['tin_no'] ?? '—') . '</td></tr>
+        <tr><td class="lbl">GSIS No.</td><td>' . e($emp['gsis_no'] ?? '—') . '</td><td></td><td></td></tr>
     </table>
 
     <table width="100%"><tr>
@@ -143,7 +145,8 @@ if (isset($_GET['form_id'])) {
         <tr><td class="lbl">Department</td><td>' . e($emp['department_name'] ?? 'Unassigned') . '</td></tr>
         <tr><td class="lbl">Position</td><td>' . e($emp['position'] ?? '—') . '</td></tr>
         <tr><td class="lbl">Applicant Type</td><td>' . e($emp['applicant_type']) . '</td></tr>
-        <tr><td class="lbl">Employment Status</td><td>' . e($emp['employment_status']) . '</td></tr>
+        <tr><td class="lbl">Employment Status</td><td>' . e($emp['appointment_status'] ?? '—') . '</td></tr>
+        <tr><td class="lbl">Record Status</td><td>' . e($emp['employment_status']) . '</td></tr>
         <tr><td class="lbl">Date Hired</td><td>' . ($emp['date_hired'] ? e(date('F j, Y', strtotime($emp['date_hired']))) : '—') . '</td></tr>
         <tr><td class="lbl">Monthly Salary</td><td><strong>' . e(peso($emp['monthly_salary'])) . '</strong></td></tr>
         <tr><td class="lbl">Daily Salary</td><td>' . e(peso(daily_salary($emp['monthly_salary'])))
@@ -169,7 +172,7 @@ $rows   = report_rows($pdo, $f);
 $title  = report_title($pdo, $f);
 $format = (string)($_GET['format'] ?? 'pdf');
 
-$headers = ['Employee No', 'Last Name', 'First Name', 'Middle Name', 'Birthdate', 'Sex',
+$headers = ['Employee No', 'Last Name', 'First Name', 'Middle Name', 'Extension', 'Birthdate', 'Sex',
             'Contact No', 'Email', 'Department', 'Position', 'Applicant Type',
             'Employment Status', 'Date Hired', 'Pending Requirements'];
 
@@ -181,18 +184,18 @@ if ($format === 'xlsx') {
     $sheet->fromArray(['Generated: ' . date('F j, Y g:i A')], null, 'A2');
     $sheet->fromArray($headers, null, 'A4');
     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A4:N4')->getFont()->setBold(true);
+    $sheet->getStyle('A4:O4')->getFont()->setBold(true);
     $line = 5;
     foreach ($rows as $r) {
         $sheet->fromArray([
-            $r['employee_no'], $r['last_name'], $r['first_name'], $r['middle_name'],
+            $r['employee_no'], $r['last_name'], $r['first_name'], $r['middle_name'], $r['name_extension'],
             $r['birthdate'], $r['sex'], $r['contact_no'], $r['email'],
             $r['department_name'] ?? 'Unassigned', $r['position'],
             $r['applicant_type'], $r['employment_status'], $r['date_hired'],
             (int)$r['pending_reqs'],
         ], null, 'A' . $line++);
     }
-    foreach (range('A', 'N') as $col) {
+    foreach (range('A', 'O') as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -206,7 +209,7 @@ $body_rows = '';
 foreach ($rows as $r) {
     $body_rows .= '<tr>'
         . '<td>' . e($r['employee_no'] ?? '—') . '</td>'
-        . '<td>' . e($r['last_name'] . ', ' . $r['first_name'] . ($r['middle_name'] ? ' ' . $r['middle_name'] : '')) . '</td>'
+        . '<td>' . e(employee_display_name($r)) . '</td>'
         . '<td>' . e($r['birthdate']) . '</td>'
         . '<td>' . e($r['sex']) . '</td>'
         . '<td>' . e($r['contact_no'] ?? '—') . '</td>'

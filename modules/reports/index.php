@@ -83,7 +83,7 @@ require __DIR__ . '/../../includes/header.php';
             <?php foreach ($rows as $r): ?>
                 <tr>
                     <td><?= e($r['employee_no'] ?? '—') ?></td>
-                    <td><?= e($r['last_name'] . ', ' . $r['first_name'] . ($r['middle_name'] ? ' ' . $r['middle_name'] : '')) ?></td>
+                    <td><?= e(employee_display_name($r)) ?></td>
                     <td><?= e($r['birthdate']) ?></td>
                     <td><?= e($r['sex']) ?></td>
                     <td><?= e($r['contact_no'] ?? '—') ?></td>
