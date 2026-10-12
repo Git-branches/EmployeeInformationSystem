@@ -10,6 +10,7 @@ require_once ROOT_PATH . '/vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 function stream_pdf(string $html, string $filename, string $orientation = 'portrait'): void
 {
@@ -167,14 +168,20 @@ if (isset($_GET['form_id'])) {
 }
 
 // ---- Employee list export -------------------------------------------------
-$f      = report_filters();
-$rows   = report_rows($pdo, $f);
-$title  = report_title($pdo, $f);
-$format = (string)($_GET['format'] ?? 'pdf');
+// Carries the same scope, filters and ticked columns as the Reports page:
+// an Overall report is grouped by department, with a summary first.
+$f       = report_filters();
+$rows    = report_rows($pdo, $f);
+$title   = report_title($pdo, $f);
+$format  = (string)($_GET['format'] ?? 'pdf');
+$columns = report_columns();
+$chosen  = $f['columns'];
+$groups  = report_groups($rows);
+$grouped = $f['scope'] === 'overall' && count($groups) > 1;
 
-$headers = ['Employee No', 'Last Name', 'First Name', 'Middle Name', 'Extension', 'Birthdate', 'Sex',
-            'Contact No', 'Email', 'Department', 'Position', 'Applicant Type',
-            'Employment Status', 'Date Hired', 'Pending Requirements'];
+$headers = array_map(fn(string $key) => $columns[$key][0], $chosen);
+/** One row's ticked values, in printing order. */
+$values  = fn(array $r) => array_map(fn(string $key) => $columns[$key][1]($r), $chosen);
 
 if ($format === 'xlsx') {
     $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -182,21 +189,39 @@ if ($format === 'xlsx') {
     $sheet->setTitle('Employee Report');
     $sheet->fromArray([$title], null, 'A1');
     $sheet->fromArray(['Generated: ' . date('F j, Y g:i A')], null, 'A2');
-    $sheet->fromArray($headers, null, 'A4');
     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A4:O4')->getFont()->setBold(true);
-    $line = 5;
-    foreach ($rows as $r) {
-        $sheet->fromArray([
-            $r['employee_no'], $r['last_name'], $r['first_name'], $r['middle_name'], $r['name_extension'],
-            $r['birthdate'], $r['sex'], $r['contact_no'], $r['email'],
-            $r['department_name'] ?? 'Unassigned', $r['position'],
-            $r['applicant_type'], $r['employment_status'], $r['date_hired'],
-            (int)$r['pending_reqs'],
-        ], null, 'A' . $line++);
+
+    $last_col = Coordinate::stringFromColumnIndex(max(1, count($chosen)));
+    $line = 4;
+
+    if ($grouped) {
+        // Summary of the department sizes, then one section per department
+        $sheet->fromArray(['Summary'], null, 'A' . $line);
+        $sheet->getStyle('A' . $line++)->getFont()->setBold(true);
+        foreach ($groups as $name => $members) {
+            $sheet->fromArray([$name, count($members)], null, 'A' . $line++);
+        }
+        $sheet->fromArray(['Total', count($rows)], null, 'A' . $line);
+        $sheet->getStyle('A' . $line . ':B' . $line)->getFont()->setBold(true);
+        $line += 2;
     }
-    foreach (range('A', 'O') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
+
+    foreach ($groups as $name => $members) {
+        if ($grouped) {
+            $sheet->fromArray([$name . ' (' . count($members) . ')'], null, 'A' . $line);
+            $sheet->getStyle('A' . $line++)->getFont()->setBold(true);
+        }
+        $sheet->fromArray($headers, null, 'A' . $line);
+        $sheet->getStyle('A' . $line . ':' . $last_col . $line)->getFont()->setBold(true);
+        $line++;
+        foreach ($members as $r) {
+            $sheet->fromArray($values($r), null, 'A' . $line++);
+        }
+        $line++;   // blank line between sections
+    }
+
+    foreach (range(1, max(1, count($chosen))) as $index) {
+        $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($index))->setAutoSize(true);
     }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="employee_report_' . date('Ymd') . '.xlsx"');
@@ -205,40 +230,55 @@ if ($format === 'xlsx') {
 }
 
 // PDF list (landscape)
-$body_rows = '';
-foreach ($rows as $r) {
-    $body_rows .= '<tr>'
-        . '<td>' . e($r['employee_no'] ?? '—') . '</td>'
-        . '<td>' . e(employee_display_name($r)) . '</td>'
-        . '<td>' . e($r['birthdate']) . '</td>'
-        . '<td>' . e($r['sex']) . '</td>'
-        . '<td>' . e($r['contact_no'] ?? '—') . '</td>'
-        . '<td>' . e($r['department_name'] ?? 'Unassigned') . '</td>'
-        . '<td>' . e($r['position'] ?? '—') . '</td>'
-        . '<td>' . e($r['applicant_type']) . '</td>'
-        . '<td>' . e($r['employment_status']) . '</td>'
-        . '<td>' . e($r['date_hired'] ?? '—') . '</td>'
-        . '<td align="center">' . (int)$r['pending_reqs'] . '</td>'
-        . '</tr>';
+$head_row = '<tr>';
+foreach ($headers as $heading) {
+    $head_row .= '<th>' . e($heading) . '</th>';
 }
-if ($body_rows === '') {
-    $body_rows = '<tr><td colspan="11" align="center">No records match the selected filters.</td></tr>';
+$head_row .= '</tr>';
+
+$body = '';
+if (!$rows) {
+    $body = '<table>' . $head_row . '<tr><td colspan="' . count($chosen)
+          . '" align="center">No records match the selected filters.</td></tr></table>';
+} else {
+    if ($grouped) {
+        $body .= '<h2>Summary</h2><table class="summary">';
+        foreach ($groups as $name => $members) {
+            $body .= '<tr><td>' . e($name) . '</td><td align="right">' . count($members) . '</td></tr>';
+        }
+        $body .= '<tr><td><strong>Total</strong></td><td align="right"><strong>' . count($rows)
+               . '</strong></td></tr></table>';
+    }
+    foreach ($groups as $name => $members) {
+        if ($grouped) {
+            $body .= '<h2>' . e($name) . ' (' . count($members) . ')</h2>';
+        }
+        $body .= '<table>' . $head_row;
+        foreach ($members as $r) {
+            $body .= '<tr>';
+            foreach ($values($r) as $value) {
+                $body .= '<td>' . e((string)$value) . '</td>';
+            }
+            $body .= '</tr>';
+        }
+        $body .= '</table>';
+    }
 }
 
 $html = '
 <style>
     body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #222; }
     h1 { font-size: 15px; margin: 0; } .sub { color: #666; margin-bottom: 10px; }
+    h2 { font-size: 11px; margin: 14px 0 4px; color: #c8102e;
+         border-bottom: 1px solid #c8102e; padding-bottom: 2px; }
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid #999; padding: 3px 5px; text-align: left; }
     th { background: #c8102e; color: #fff; }
+    table.summary { width: auto; }
+    table.summary td { border: none; padding: 1px 12px 1px 0; }
 </style>
 <h1>' . (APP_COMPANY !== '' ? e(APP_COMPANY) . ' — ' : '') . e($title) . '</h1>
 <div class="sub">Generated ' . e(date('F j, Y g:i A')) . ' · ' . count($rows) . ' record(s)</div>
-<table>
-    <tr><th>Emp No</th><th>Name</th><th>Birthdate</th><th>Sex</th><th>Contact</th><th>Department</th>
-        <th>Position</th><th>Type</th><th>Status</th><th>Hired</th><th>Pending</th></tr>
-    ' . $body_rows . '
-</table>';
+' . $body;
 
 stream_pdf($html, 'employee_report_' . date('Ymd') . '.pdf', 'landscape');

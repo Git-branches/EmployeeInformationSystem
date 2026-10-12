@@ -242,6 +242,41 @@ function reformatKeepingCaret(field, format) {
     });
 })();
 
+// ---- Reports page: scope and the "Select all" column box -------------------
+(function () {
+    const form = document.getElementById('report-filters');
+    if (!form) return;
+
+    // The department list only applies to a "By department" report
+    const department = document.getElementById('report-department');
+    const scopes = form.querySelectorAll('input[name="scope"]');
+    function syncScope() {
+        const byDepartment = form.querySelector('input[name="scope"]:checked').value === 'department';
+        department.disabled = !byDepartment;
+        if (byDepartment) department.focus();
+    }
+    scopes.forEach(function (radio) { radio.addEventListener('change', syncScope); });
+    // Choosing a department implies that is the report wanted
+    department.addEventListener('change', function () {
+        if (department.value) document.getElementById('scope-department').checked = true;
+    });
+
+    // "Select all" ticks every column; ticking them all by hand ticks it back
+    const all = document.getElementById('columns-all');
+    const boxes = Array.from(form.querySelectorAll('.report-column'));
+    all.addEventListener('change', function () {
+        boxes.forEach(function (box) { box.checked = all.checked; });
+    });
+    boxes.forEach(function (box) {
+        box.addEventListener('change', function () {
+            all.checked = boxes.every(function (b) { return b.checked; });
+            all.indeterminate = !all.checked && boxes.some(function (b) { return b.checked; });
+        });
+    });
+    all.indeterminate = !boxes.every(function (b) { return b.checked; })
+        && boxes.some(function (b) { return b.checked; });
+})();
+
 // ---- Employee list: results while you type ---------------------------------
 // The filter form still works on its own (Enter or the search button reloads
 // the page); this only refreshes the rows sooner. The address bar is kept in
