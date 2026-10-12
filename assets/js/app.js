@@ -242,6 +242,67 @@ function reformatKeepingCaret(field, format) {
     });
 })();
 
+// ---- Employee list: results while you type ---------------------------------
+// The filter form still works on its own (Enter or the search button reloads
+// the page); this only refreshes the rows sooner. The address bar is kept in
+// step so the view can be reloaded or bookmarked.
+(function () {
+    const form = document.getElementById('employee-filters');
+    const rows = document.getElementById('employee-rows');
+    const count = document.getElementById('employee-count');
+    if (!form || !rows || !count) return;
+
+    const busy = document.getElementById('employee-search-busy');
+    const url = form.dataset.searchUrl;
+    let timer = null;
+    let inFlight = null;
+    let lastQuery = new URLSearchParams(new FormData(form)).toString();
+
+    function refresh() {
+        const query = new URLSearchParams(new FormData(form)).toString();
+        if (query === lastQuery) return;
+        lastQuery = query;
+
+        // Drop the answer to the previous keystroke: it is already outdated.
+        if (inFlight) inFlight.abort();
+        inFlight = new AbortController();
+        if (busy) busy.classList.remove('d-none');
+
+        fetch(url + '?' + query, { signal: inFlight.signal })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data) return;
+                rows.innerHTML = data.rows;
+                count.textContent = data.count;
+                if (busy) busy.classList.add('d-none');
+                history.replaceState(null, '', query ? '?' + query : location.pathname);
+            })
+            .catch(function (error) {
+                // An aborted request is replaced by a newer one; anything else
+                // (offline) leaves the current rows in place.
+                if (error.name !== 'AbortError' && busy) busy.classList.add('d-none');
+            });
+    }
+
+    form.addEventListener('input', function (event) {
+        if (event.target.type === 'search' || event.target.name === 'q') {
+            clearTimeout(timer);
+            timer = setTimeout(refresh, 250);
+        }
+    });
+    // Dropdowns apply at once, and so does clearing the box with Esc or the ×
+    form.addEventListener('change', function () {
+        clearTimeout(timer);
+        refresh();
+    });
+    // Enter would reload the whole page for the same result
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(timer);
+        refresh();
+    });
+})();
+
 // ---- Live notifications bell ------------------------------------------------
 (function () {
     const badge = document.getElementById('notif-badge');
