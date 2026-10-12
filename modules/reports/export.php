@@ -171,11 +171,18 @@ if (isset($_GET['form_id'])) {
 // Carries the same scope, filters and ticked columns as the Reports page:
 // an Overall report is grouped by department, with a summary first.
 $f       = report_filters();
+$chosen  = $f['columns'];
+
+// An export of no columns is an empty sheet; send them back to choose.
+if (!$chosen) {
+    flash_set('danger', 'Choose the information to include before exporting the report.');
+    redirect('/modules/reports/index.php');
+}
+
 $rows    = report_rows($pdo, $f);
 $title   = report_title($pdo, $f);
 $format  = (string)($_GET['format'] ?? 'pdf');
 $columns = report_columns();
-$chosen  = $f['columns'];
 $groups  = report_groups($rows);
 $grouped = $f['scope'] === 'overall' && count($groups) > 1;
 

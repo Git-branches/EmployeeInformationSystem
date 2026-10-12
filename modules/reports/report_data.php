@@ -46,12 +46,11 @@ function report_columns(): array
 /** Columns whose text is long enough to wrap rather than widen the table. */
 const REPORT_WRAPPING_COLUMNS = ['address', 'email', 'name', 'position', 'department_name'];
 
-/** Columns ticked before the administrator chooses: the long-standing set. */
-const REPORT_DEFAULT_COLUMNS = [
-    'employee_no', 'name', 'birthdate', 'sex', 'contact_no',
-    'department_name', 'position', 'applicant_type', 'employment_status',
-    'date_hired', 'pending_reqs',
-];
+/**
+ * Nothing is ticked until the administrator chooses: the report is built
+ * from what they pick, either box by box or with "Select all".
+ */
+const REPORT_DEFAULT_COLUMNS = [];
 
 function report_filters(): array
 {
@@ -76,19 +75,16 @@ function report_filters(): array
 }
 
 /**
- * The ticked columns, in printing order. Falls back to the defaults when the
- * page is opened without a choice, and to Name alone if every box was cleared
- * (a report of nothing but row numbers is of no use to anyone).
+ * The ticked columns, in printing order. Empty until the administrator
+ * ticks something, and empty again if they clear every box — the page then
+ * asks them to choose instead of guessing on their behalf.
  */
 function report_selected_columns(): array
 {
-    $available = array_keys(report_columns());
-
     if (!isset($_GET['columns'])) {
         return REPORT_DEFAULT_COLUMNS;
     }
-    $chosen = array_intersect($available, (array)$_GET['columns']);
-    return $chosen ? array_values($chosen) : ['name'];
+    return array_values(array_intersect(array_keys(report_columns()), (array)$_GET['columns']));
 }
 
 /** Filter/column choices as a query string, for the export links. */

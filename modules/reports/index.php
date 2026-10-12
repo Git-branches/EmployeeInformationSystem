@@ -24,9 +24,18 @@ require __DIR__ . '/../../includes/header.php';
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="bi bi-file-earmark-text me-2"></i>Reports</h1>
     <div>
-        <button onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Print</button>
-        <a href="export.php?format=pdf&<?= e($qs) ?>" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Export PDF</a>
-        <a href="export.php?format=xlsx&<?= e($qs) ?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
+        <?php // Nothing to print or export until something is ticked ?>
+        <button onclick="window.print()" class="btn btn-outline-secondary" <?= $chosen ? '' : 'disabled' ?>>
+            <i class="bi bi-printer me-1"></i>Print
+        </button>
+        <a href="export.php?format=pdf&<?= e($qs) ?>"
+           class="btn btn-outline-danger<?= $chosen ? '' : ' disabled' ?>" <?= $chosen ? '' : 'aria-disabled="true" tabindex="-1"' ?>>
+            <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+        </a>
+        <a href="export.php?format=xlsx&<?= e($qs) ?>"
+           class="btn btn-outline-success<?= $chosen ? '' : ' disabled' ?>" <?= $chosen ? '' : 'aria-disabled="true" tabindex="-1"' ?>>
+            <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+        </a>
     </div>
 </div>
 
@@ -89,9 +98,12 @@ require __DIR__ . '/../../includes/header.php';
                         <span>3 · Include in report</span>
                         <span class="fw-normal small text-muted" id="columns-chosen-count"><?= count($chosen) ?> of <?= count($columns) ?></span>
                     </h2>
+                    <!-- autocomplete="off" on every box: without it the browser
+                         restores the ticks from the previous visit, which would
+                         contradict what the server rendered. -->
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="columns-all"
-                               <?= count($chosen) === count($columns) ? 'checked' : '' ?>>
+                        <input class="form-check-input" type="checkbox" id="columns-all" autocomplete="off"
+                               <?= $chosen && count($chosen) === count($columns) ? 'checked' : '' ?>>
                         <label class="form-check-label fw-semibold" for="columns-all">Select all</label>
                     </div>
                     <!-- Two or three columns of boxes, so all 22 fit without a
@@ -100,15 +112,17 @@ require __DIR__ . '/../../includes/header.php';
                         <?php foreach ($columns as $key => [$label, $_]): ?>
                             <div class="form-check">
                                 <input class="form-check-input report-column" type="checkbox" name="columns[]"
-                                       value="<?= e($key) ?>" id="col-<?= e($key) ?>"
+                                       value="<?= e($key) ?>" id="col-<?= e($key) ?>" autocomplete="off"
                                        <?= in_array($key, $chosen, true) ? 'checked' : '' ?>>
                                 <label class="form-check-label small" for="col-<?= e($key) ?>"><?= e($label) ?></label>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php if (isset($_GET['columns']) && $chosen === ['name']): ?>
-                        <div class="form-text text-danger">Nothing was ticked, so the name alone is shown.</div>
-                    <?php endif; ?>
+                    <div class="form-text<?= $chosen ? '' : ' text-danger' ?>">
+                        <?= $chosen
+                            ? 'Only ticked items appear in the report and its exports.'
+                            : 'Tick the information to include, or use Select all.' ?>
+                    </div>
                 </div>
             </div>
 
@@ -131,12 +145,22 @@ require __DIR__ . '/../../includes/header.php';
     <div class="card-header bg-white">
         <div class="fw-semibold"><?= e($title) ?></div>
         <div class="small text-muted">
-            Generated <?= e(date('F j, Y g:i A')) ?> — <?= count($rows) ?> record(s)
-            <?= $f['scope'] === 'overall' ? 'in ' . count($groups) . ' department(s)' : '' ?>
+            <?php if ($chosen): ?>
+                Generated <?= e(date('F j, Y g:i A')) ?> — <?= count($rows) ?> record(s)
+                <?= $f['scope'] === 'overall' ? 'in ' . count($groups) . ' department(s)' : '' ?>
+            <?php else: ?>
+                Nothing selected yet
+            <?php endif; ?>
         </div>
     </div>
 
-    <?php if (!$rows): ?>
+    <?php if (!$chosen): ?>
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-list-check fs-1 d-block mb-2 opacity-50"></i>
+            Tick the information to include under <strong>3 · Include in report</strong>,
+            then press Generate.
+        </div>
+    <?php elseif (!$rows): ?>
         <div class="card-body text-center text-muted py-5">No records match the selected filters.</div>
     <?php else: ?>
         <?php $grouped = $f['scope'] === 'overall' && count($groups) > 1; ?>
