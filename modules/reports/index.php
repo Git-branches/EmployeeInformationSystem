@@ -127,7 +127,7 @@ require __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<div class="card shadow-sm">
+<div class="card shadow-sm report-card">
     <div class="card-header bg-white">
         <div class="fw-semibold"><?= e($title) ?></div>
         <div class="small text-muted">
@@ -161,8 +161,10 @@ require __DIR__ . '/../../includes/header.php';
         <?php endif; ?>
 
         <!-- One table for the whole report: the headings stay put and every
-             section lines up under the same columns, with a single scrollbar. -->
-        <div class="table-responsive report-table">
+             section lines up under the same columns. It is deliberately not
+             wrapped in .table-responsive — that would scroll the headings
+             out of view (see .report-table in style.css). -->
+        <div class="report-table">
             <table class="table table-sm table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>

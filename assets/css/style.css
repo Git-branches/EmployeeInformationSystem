@@ -27,20 +27,47 @@
     --eis-muted: #64748b;
 }
 
-/* Reserve the scrollbar space always, so switching between short and long
-   pages does not shift the layout sideways. */
-html {
-    overflow-y: scroll;
-    scrollbar-gutter: stable;
+/* ---- App shell -------------------------------------------------------
+   The navbar and the sidebar stay put and only the main column scrolls,
+   so the menu is always within reach however long the page is. The window
+   itself never scrolls, which is what keeps the two in place.
+
+   The structure this relies on (includes/header.php):
+       nav.navbar
+       div.d-flex      ← the row below the navbar, fills the rest
+         aside.sidebar
+         main          ← the only part that scrolls
+   On phones and tablets the sidebar is an offcanvas drawer, so the same
+   rules work there without a separate layout.                           */
+html, body {
+    height: 100%;
+}
+body {
+    /* Bootstrap adds compensation padding when the drawer opens; the page
+       does not scroll here, so it would only shift the layout. */
+    padding-right: 0 !important;
+    margin: 0;
+    background-color: var(--eis-surface);
+    color: var(--eis-text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* The scrollbar space is already reserved above, so Bootstrap must not add
-   its own compensation padding when the mobile menu drawer opens. */
-body {
-    padding-right: 0 !important;
-    background-color: var(--eis-surface);
-    min-height: 100vh;
-    color: var(--eis-text);
+/* The navbar keeps its height; the row below takes whatever is left */
+body > nav.navbar { flex: 0 0 auto; }
+body > .d-flex {
+    flex: 1 1 auto;
+    min-height: 0;        /* lets the children scroll instead of overflowing */
+}
+
+main {
+    flex: 1 1 auto;
+    min-width: 0;         /* may shrink, so a wide table cannot stretch it */
+    min-height: 0;
+    overflow: auto;       /* the one scrolling area: down, and sideways when needed */
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;   /* no scroll chaining to the window */
 }
 
 .min-w-0 { min-width: 0; }
@@ -129,8 +156,12 @@ nav.navbar {
 @media (min-width: 992px) {
     .sidebar {
         width: 230px;
-        min-height: calc(100vh - 60px);
-        flex-shrink: 0;
+        flex: 0 0 230px;
+        /* Full height of the row below the navbar. The menu scrolls on its
+           own only if it ever grows taller than the screen. */
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 }
 .sidebar .offcanvas-header { border-bottom: 3px solid var(--eis-accent); }
@@ -163,9 +194,16 @@ nav.navbar {
 .card {
     border: none;
     border-radius: .85rem;
-    overflow: hidden;
+    /* `clip` keeps the rounded corners trimming the content, the way
+       `hidden` did, without turning the card into a scroll container —
+       which would stop `position: sticky` working inside it. */
+    overflow: clip;
     background-color: var(--eis-card);
     box-shadow: 0 2px 8px rgba(19, 78, 74, .07);
+}
+/* Older browsers without `overflow: clip` keep the previous behaviour */
+@supports not (overflow: clip) {
+    .card { overflow: hidden; }
 }
 .card-header {
     background-color: var(--eis-card) !important;
@@ -238,11 +276,7 @@ input[type="password"]::-ms-clear {
 
 /* ---- Mobile / tablet responsiveness ---------------------------------- */
 @media (max-width: 991.98px) {
-    main {
-        padding: 1rem !important;
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
+    main { padding: 1rem !important; }
     main > .d-flex.justify-content-between {
         flex-wrap: wrap;
         gap: .5rem;
@@ -278,19 +312,34 @@ input[type="password"]::-ms-clear {
    sized by its content by default, so min-width:0 lets it shrink instead. */
 main { min-width: 0; }
 
-.report-table {
-    max-width: 100%;
-    overflow-x: auto;
-}
-/* The column headings stay visible while a long list is scrolled */
+/* Only sideways: the main column already provides the vertical scroll, so
+   a second vertical scrollbar here would be one too many.
+   `overflow-x: auto` with `overflow-y: visible` is not a valid pair — the
+   browser turns the vertical axis into `auto` as well, which both adds a
+   second scrollbar and traps `position: sticky` inside this box. Clipping
+   only the inline axis keeps the block axis genuinely visible, so the
+   headings stick against the scrolling main column instead. */
+/* A box that scrolls on one axis also clips the other, so a
+   sideways-scrolling wrapper would become the sticky headings' scroll
+   container and they would stop following the page. The report table is
+   therefore not wrapped in one: the main column carries both axes, which
+   keeps the headings stuck under the navbar while a wide report is
+   scrolled sideways. The sidebar and navbar are outside main, so they
+   stay put either way.
+   The card around it must not clip either, or the table would be cut off
+   at the card's edge instead of reaching main's scroll area. */
+.report-card { overflow: visible; }
+.report-table > table { margin-bottom: 0; }
+/* The column headings stay visible while a long list is scrolled. They
+   stop right under the navbar, which is the top of the main column. */
 .report-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
     white-space: nowrap;
     background-color: #eef4f4;
+    box-shadow: inset 0 -1px 0 var(--eis-line);
 }
-.report-table { max-height: 70vh; overflow-y: auto; }
 /* Short values read better on one line. The long ones (address, email)
    may wrap, but never into a narrow ribbon of one or two characters:
    below min-width the table scrolls sideways instead. */
@@ -345,6 +394,15 @@ main { min-width: 0; }
     body { background: #fff; }
     .sidebar, nav.navbar, .btn, .alert, form.card { display: none !important; }
     .card { box-shadow: none; border-radius: 0; }
+
+    /* On paper there is no viewport to fit: undo the app shell so the
+       whole page prints instead of just the part that was on screen. */
+    html, body, body > .d-flex, main {
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+    main { padding: 0 !important; }
 
     /* On paper nothing scrolls: show the report whole and let it wrap */
     .report-table {
