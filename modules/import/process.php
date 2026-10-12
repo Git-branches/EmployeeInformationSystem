@@ -84,6 +84,8 @@ try {
         // Mobile numbers in the standard 0994-800-7500 form; anything else as given
         $contact_no = $val($row, 'contact_no');
         $contact_no = format_ph_mobile($contact_no) ?? $contact_no;
+        $emergency_no = $val($row, 'emergency_contact_no');
+        $emergency_no = format_ph_mobile($emergency_no) ?? $emergency_no;
 
         $emp_insert->execute([
             $row['employee_no'],
@@ -112,7 +114,7 @@ try {
             (int)($row['elig_sub_professional'] ?? 0),
             (int)($row['elig_ra1080'] ?? 0),
             $val($row, 'emergency_contact_name'),
-            $val($row, 'emergency_contact_no'),
+            $emergency_no,
             $department_id,
             $position_id,
             $position,

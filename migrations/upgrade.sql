@@ -192,3 +192,16 @@ JOIN (
 ) n ON n.employee_id = e.employee_id
 SET e.contact_no = CONCAT(SUBSTRING(n.d, 1, 4), '-', SUBSTRING(n.d, 5, 3), '-', SUBSTRING(n.d, 8, 4))
 WHERE n.d IS NOT NULL;
+
+-- ---- 004: the emergency contact number follows the same format ----
+UPDATE employees e
+JOIN (
+    SELECT DISTINCT employee_id,
+           CASE WHEN digits REGEXP '^09[0-9]{9}$'  THEN digits
+                WHEN digits REGEXP '^639[0-9]{9}$' THEN CONCAT('0', SUBSTRING(digits, 3))
+           END AS d
+    FROM (SELECT employee_id, REGEXP_REPLACE(emergency_contact_no, '[^0-9]', '') AS digits
+          FROM employees WHERE emergency_contact_no IS NOT NULL) raw
+) n ON n.employee_id = e.employee_id
+SET e.emergency_contact_no = CONCAT(SUBSTRING(n.d, 1, 4), '-', SUBSTRING(n.d, 5, 3), '-', SUBSTRING(n.d, 8, 4))
+WHERE n.d IS NOT NULL;

@@ -43,15 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $salary_ok  = $salary_raw === ''
         || (preg_match('/^\d+(\.\d{1,2})?$/', $salary_raw) && (float)$salary_raw <= 9999999999.99);
 
-    // Mobile number, stored as 0994-800-7500. A number already on file in some
-    // other form (e.g. a landline) is kept as long as it is left unchanged.
-    $contact_raw = trim((string)($_POST['contact_no'] ?? ''));
-    $contact     = format_ph_mobile($contact_raw);
-    $contact_ok  = $contact_raw === '' || $contact !== null
-        || ($is_edit && $contact_raw === (string)($employee['contact_no'] ?? ''));
-    if ($contact === null && $contact_ok && $contact_raw !== '') {
-        $contact = $contact_raw;
-    }
+    /**
+     * A phone field, stored as 0994-800-7500. A number already on file in
+     * some other form (e.g. a landline) is kept as long as it is left
+     * unchanged, so editing an old record does not force it to be retyped.
+     * Returns [value to store, typed value, is it acceptable].
+     */
+    $phone = function (string $field) use ($is_edit, $employee): array {
+        $raw    = trim((string)($_POST[$field] ?? ''));
+        $masked = format_ph_mobile($raw);
+        $kept   = $is_edit && $raw === (string)($employee[$field] ?? '');
+        $ok     = $raw === '' || $masked !== null || $kept;
+        return [$masked ?? ($ok && $raw !== '' ? $raw : null), $raw, $ok];
+    };
+
+    [$contact, $contact_raw, $contact_ok]       = $phone('contact_no');
+    [$emergency, $emergency_raw, $emergency_ok] = $phone('emergency_contact_no');
 
     // Address: only the purok/street is typed; the rest come from the dropdowns
     $street       = $text('address_street');
@@ -112,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // ---- Emergency contact
         'emergency_contact_name' => $text('emergency_contact_name'),
-        'emergency_contact_no'   => $text('emergency_contact_no'),
+        'emergency_contact_no'   => $emergency_ok ? $emergency : null,
 
         // ---- Employment information
         // position keeps the position's name alongside the link, for reports.
@@ -157,6 +164,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!$contact_ok) {
         $errors['contact_no'] = 'Enter an 11-digit mobile number starting with 09, e.g. 0994-800-7500.';
+    }
+    if (!$emergency_ok) {
+        $errors['emergency_contact_no'] = 'Enter an 11-digit mobile number starting with 09, e.g. 0994-800-7500.';
     }
     if ($data['email'] !== null && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Please enter a valid email address.';
@@ -248,7 +258,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Re-fill the form with what was submitted when validation failed
     $employee = array_merge($employee ?? [], $data, [
         'photo_path'     => $employee['photo_path'] ?? null,
-        'contact_no'     => $contact_raw,  // keep what was typed, so it can be corrected
+        // keep what was typed, so it can be corrected
+        'contact_no'           => $contact_raw,
+        'emergency_contact_no' => $emergency_raw,
         'monthly_salary' => $salary_raw,
     ]);
 }
@@ -265,6 +277,8 @@ $msg = fn(string $key) => isset($errors[$key]) ? '<div class="invalid-feedback">
 
 // Contact number as shown: standard format when it is a valid mobile number
 $contact_shown = format_ph_mobile($employee['contact_no'] ?? null) ?? (string)($employee['contact_no'] ?? '');
+$emergency_shown = format_ph_mobile($employee['emergency_contact_no'] ?? null)
+    ?? (string)($employee['emergency_contact_no'] ?? '');
 
 // Salary with thousands separators; a figure that failed validation is shown as typed
 $salary = $employee['monthly_salary'] ?? '';
@@ -543,9 +557,12 @@ $emp_daily = daily_salary(is_numeric($salary) ? $salary : null);
                        placeholder="Full name" data-uppercase value="<?= $v('emergency_contact_name') ?>">
             </div>
             <div class="col-md-5">
-                <label class="form-label">Contact Number</label>
-                <input type="text" class="form-control" name="emergency_contact_no" maxlength="20"
-                       placeholder="09XX XXX XXXX" value="<?= $v('emergency_contact_no') ?>">
+                <label class="form-label" for="emergency_contact_no">Contact Number</label>
+                <input type="tel" class="form-control<?= $bad('emergency_contact_no') ?>" id="emergency_contact_no"
+                       name="emergency_contact_no" maxlength="20" inputmode="numeric" autocomplete="tel"
+                       placeholder="0994-800-7500" data-ph-mobile
+                       value="<?= e($emergency_shown) ?>">
+                <?= $msg('emergency_contact_no') ?>
             </div>
         </div>
 
