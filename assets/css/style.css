@@ -420,14 +420,61 @@ main { min-width: 0; }
        so nothing is broken into a stack of fragments on paper. */
     .report-table td.report-wrap { min-width: 0; max-width: none; }
 
-    /* Fit the full width of the report on the sheet. A wide report is
-       printed landscape (Print dialog) and the type scales down so the
-       right-hand columns are not cut off. */
+    /* Fit the full width of the report on the sheet; the type scales down
+       so the right-hand columns are not cut off. Only the employee list
+       report asks for landscape — see .report-page below. Everything else,
+       the information form above all, stays portrait. */
     .report-table table { width: 100%; table-layout: auto; }
-    .table { font-size: .68rem; }
+    .report-table .table { font-size: .68rem; }
     .report-table td, .report-table th { padding: .2rem .3rem; }
-    @page { size: landscape; margin: 10mm; }
     /* Keep a department's heading with at least some of its rows */
     .report-group { break-after: avoid; }
     thead { display: table-header-group; }
+
+    /* ---- Employee information form on paper ----
+       One upright sheet: the screen card's padding, rounded corners and
+       max-width are for the screen, and Bootstrap's grid columns must keep
+       sitting side by side (the print stylesheet of some browsers stacks
+       them, which is what broke the form into quarters). */
+    .card { break-inside: auto; }
+    .card-body { padding: 0 !important; }
+    .card.shadow-sm.mx-auto { max-width: none !important; }
+
+    .row { display: flex !important; flex-wrap: nowrap !important; }
+    .row > [class*="col-"] { float: none !important; }
+    .col-9  { flex: 0 0 75%; max-width: 75%; }
+    .col-6  { flex: 0 0 50%; max-width: 50%; }
+    .col-3  { flex: 0 0 25%; max-width: 25%; }
+
+    /* Fit the whole form on one sheet without shrinking it to nothing */
+    .card-body .table-sm td, .card-body .table-sm th { padding: .08rem .4rem; }
+    .card-body .table { font-size: .76rem; margin-bottom: .35rem !important; }
+    .card-body h2, .card-body h3 {
+        font-size: .8rem;
+        margin-top: .45rem;
+        margin-bottom: .25rem;
+        padding-bottom: .15rem !important;
+    }
+    .card-body .mb-4 { margin-bottom: .4rem !important; }
+    .card-body .pb-2 { padding-bottom: .15rem !important; }
+    .card-body .row.mb-4 { margin-bottom: .3rem !important; }
+
+    /* Never split a section or a row across two sheets */
+    table, tr, td, th { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+
+    /* The signature block belongs under the form, not alone on a second page */
+    .mt-5.pt-4 {
+        margin-top: 1rem !important;
+        padding-top: .25rem !important;
+        break-inside: avoid;
+        break-before: avoid;
+    }
+    .foot, .text-muted.small.mt-4 { margin-top: .5rem !important; font-size: .65rem; }
 }
+
+/* Paper: portrait by default, so the employee information form prints as
+   one upright sheet. `@page` applies to the whole document and cannot be
+   limited by a selector, so the wide employee list report overrides it
+   from its own page (see modules/reports/index.php). */
+@page { size: A4 portrait; margin: 12mm; }

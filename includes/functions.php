@@ -160,6 +160,18 @@ function peso(int|float|string|null $amount): string
     return '₱' . number_format((float)$amount, 2);
 }
 
+/**
+ * URL for a stylesheet or script, carrying the file's own change time.
+ * Browsers cache these files for a long time, so an updated system would
+ * otherwise keep running the copy a browser already holds until its cache
+ * is cleared by hand. The stamp changes with the file, and only then.
+ */
+function asset_url(string $path): string
+{
+    $stamp = @filemtime(ROOT_PATH . $path);
+    return BASE_URL . $path . ($stamp ? '?v=' . $stamp : '');
+}
+
 /** Redirect to a path relative to BASE_URL and stop the script. */
 function redirect(string $path): void
 {

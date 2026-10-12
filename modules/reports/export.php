@@ -40,27 +40,11 @@ if (isset($_GET['form_id'])) {
         flash_set('danger', 'Employee not found.');
         redirect('/modules/reports/index.php');
     }
-    $reqs = $pdo->prepare(
-        'SELECT rt.requirement_name, er.status, er.date_submitted
-         FROM employee_requirements er
-         JOIN requirement_types rt ON rt.requirement_type_id = er.requirement_type_id
-         WHERE er.employee_id = ? AND rt.is_active = 1 ORDER BY rt.requirement_name'
-    );
-    $reqs->execute([$id]);
-    $requirements = $reqs->fetchAll();
-
+    // The requirements checklist is deliberately left off this form: it is
+    // one sheet, and the checklist has its own page under Requirements.
     $photo_html = '<div style="width:120px;height:120px;border:1px solid #999;text-align:center;line-height:120px;color:#999;font-size:11px">2x2 Photo</div>';
     if ($emp['photo_path'] && is_file(ROOT_PATH . '/' . $emp['photo_path'])) {
         $photo_html = '<img src="' . e(ROOT_PATH . '/' . $emp['photo_path']) . '" style="width:120px;height:120px;object-fit:cover;border:1px solid #999">';
-    }
-
-    $req_rows = '';
-    foreach ($requirements as $r) {
-        $req_rows .= '<tr><td>' . e($r['requirement_name']) . '</td><td>' . e($r['status']) . '</td><td>'
-                   . ($r['date_submitted'] ? e(date('M j, Y', strtotime($r['date_submitted']))) : '') . '</td></tr>';
-    }
-    if ($req_rows === '') {
-        $req_rows = '<tr><td colspan="3">No requirements defined.</td></tr>';
     }
 
     $full_name = employee_display_name($emp);
@@ -86,20 +70,19 @@ if (isset($_GET['form_id'])) {
 
     $html = '
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
-        h1 { font-size: 16px; text-align: center; margin: 0; }
-        .sub { text-align: center; color: #666; margin-bottom: 4px; }
-        .form-title { text-align: center; font-weight: bold; text-transform: uppercase; margin: 8px 0 16px; border-bottom: 2px solid #c8102e; padding-bottom: 8px; }
-        table.info td { padding: 3px 6px; vertical-align: top; }
+        /* Sized so the whole form lands on one upright A4 sheet */
+        @page { margin: 12mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 15px; text-align: center; margin: 0; }
+        .sub { text-align: center; color: #666; margin-bottom: 3px; }
+        .form-title { text-align: center; font-weight: bold; text-transform: uppercase; margin: 6px 0 10px; border-bottom: 2px solid #c8102e; padding-bottom: 5px; }
+        table.info td { padding: 2px 6px; vertical-align: top; }
         td.lbl { color: #666; width: 150px; }
-        h2 { font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #999; padding-bottom: 3px; margin-top: 18px; }
-        table.req { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        table.req th, table.req td { border: 1px solid #999; padding: 4px 6px; text-align: left; }
-        table.req th { background: #f0f0f0; }
-        .sig { margin-top: 60px; width: 100%; }
+        h2 { font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #999; padding-bottom: 2px; margin: 10px 0 3px; }
+        .sig { margin-top: 34px; width: 100%; }
         .sig td { width: 50%; text-align: center; }
         .sig .line { border-top: 1px solid #222; margin: 0 40px; padding-top: 3px; }
-        .foot { color: #888; font-size: 10px; margin-top: 30px; }
+        .foot { color: #888; font-size: 9px; margin-top: 14px; }
     </style>
     ' . $letterhead . '
     <div class="form-title">Employee Information Form</div>
@@ -152,11 +135,6 @@ if (isset($_GET['form_id'])) {
         <tr><td class="lbl">Monthly Salary</td><td><strong>' . e(peso($emp['monthly_salary'])) . '</strong></td></tr>
         <tr><td class="lbl">Daily Salary</td><td>' . e(peso(daily_salary($emp['monthly_salary'])))
             . ' <span style="color:#666">(&divide; ' . WORKING_DAYS_PER_MONTH . ' working days)</span></td></tr>
-    </table>
-    <h2>Requirements Checklist</h2>
-    <table class="req">
-        <tr><th>Requirement</th><th width="110">Status</th><th width="120">Date Submitted</th></tr>
-        ' . $req_rows . '
     </table>
     <table class="sig"><tr>
         <td><div class="line">Employee Signature</div></td>

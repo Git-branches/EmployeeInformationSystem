@@ -144,22 +144,26 @@ require __DIR__ . '/../../includes/header.php';
             </tr>
         </table>
 
-        <h3 class="h6 text-uppercase border-bottom pb-2">Requirements Checklist</h3>
-        <table class="table table-sm table-bordered">
-            <thead class="table-light"><tr><th>Requirement</th><th style="width:120px">Status</th><th style="width:140px">Date Submitted</th></tr></thead>
-            <tbody>
-            <?php foreach ($requirements as $r): ?>
-                <tr>
-                    <td><?= e($r['requirement_name']) ?></td>
-                    <td><?= e($r['status']) ?></td>
-                    <td><?= $r['date_submitted'] ? e(date('M j, Y', strtotime($r['date_submitted']))) : '' ?></td>
-                </tr>
-            <?php endforeach; ?>
-            <?php if (!$requirements): ?>
-                <tr><td colspan="3" class="text-muted">No requirements defined.</td></tr>
-            <?php endif; ?>
-            </tbody>
-        </table>
+        <?php // Shown on screen only: the printed form is one sheet, and the
+              // checklist has its own page under Requirements. ?>
+        <div class="d-print-none">
+            <h3 class="h6 text-uppercase border-bottom pb-2">Requirements Checklist</h3>
+            <table class="table table-sm table-bordered">
+                <thead class="table-light"><tr><th>Requirement</th><th style="width:120px">Status</th><th style="width:140px">Date Submitted</th></tr></thead>
+                <tbody>
+                <?php foreach ($requirements as $r): ?>
+                    <tr>
+                        <td><?= e($r['requirement_name']) ?></td>
+                        <td><?= e($r['status']) ?></td>
+                        <td><?= $r['date_submitted'] ? e(date('M j, Y', strtotime($r['date_submitted']))) : '' ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if (!$requirements): ?>
+                    <tr><td colspan="3" class="text-muted">No requirements defined.</td></tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
         <div class="row mt-5 pt-4">
             <div class="col-6 text-center">

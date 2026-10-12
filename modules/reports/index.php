@@ -21,6 +21,8 @@ $departments = $pdo->query('SELECT department_id, department_name FROM departmen
 $page_title = 'Reports';
 require __DIR__ . '/../../includes/header.php';
 ?>
+<?php // This report is wide, so it is the one page that prints landscape. ?>
+<style>@media print { @page { size: A4 landscape; margin: 10mm; } }</style>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="bi bi-file-earmark-text me-2"></i>Reports</h1>
     <div>

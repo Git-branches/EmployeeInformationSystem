@@ -14,7 +14,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="<?= BASE_URL ?>/assets/css/fonts/bootstrap-icons.woff2">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/bootstrap.min.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+<link rel="stylesheet" href="<?= asset_url('/assets/css/style.css') ?>">
 </head>
 <body data-base-url="<?= BASE_URL ?>">
 <nav class="navbar navbar-dark bg-danger px-3 flex-nowrap">
