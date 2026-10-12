@@ -1,9 +1,25 @@
-EMPLOYEE INFORMATION SYSTEM  1.2.1
+EMPLOYEE INFORMATION SYSTEM  1.2.2
 
 Employee and applicant records, requirements monitoring, reports and backups.
 
-WHAT IS NEW IN 1.2.1
+WHAT IS NEW IN 1.2.2
 --------------------
+  * New "Clear Form" button on Add Employee, so a half-filled entry you
+    walked away from can be thrown out in one go instead of field by
+    field. On Edit it reads "Undo Changes" and puts back the saved
+    details without touching the record.
+  * The emergency contact number is now formatted like the employee's
+    own CP number: 0994-800-7500.
+  * The printed Employee Information Form is one upright (portrait)
+    sheet again, instead of printing sideways across two pages. The
+    requirements checklist stays on screen and on its own page under
+    Requirements.
+  * After an update the browser now picks up the new screens by itself;
+    previously it could keep showing the previous version until its
+    cache was cleared by hand.
+
+WHAT WAS NEW IN 1.2.1
+---------------------
   * The employee list now filters as you type - no need to press Enter
     or the search button. It also searches the middle name, the employee
     number and the position, in any order.
