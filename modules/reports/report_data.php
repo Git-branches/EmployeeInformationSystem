@@ -43,6 +43,9 @@ function report_columns(): array
     ];
 }
 
+/** Columns whose text is long enough to wrap rather than widen the table. */
+const REPORT_WRAPPING_COLUMNS = ['address', 'email', 'name', 'position', 'department_name'];
+
 /** Columns ticked before the administrator chooses: the long-standing set. */
 const REPORT_DEFAULT_COLUMNS = [
     'employee_no', 'name', 'birthdate', 'sex', 'contact_no',

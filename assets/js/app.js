@@ -264,17 +264,20 @@ function reformatKeepingCaret(field, format) {
     // "Select all" ticks every column; ticking them all by hand ticks it back
     const all = document.getElementById('columns-all');
     const boxes = Array.from(form.querySelectorAll('.report-column'));
+    const tally = document.getElementById('columns-chosen-count');
+
+    function syncColumns() {
+        const ticked = boxes.filter(function (b) { return b.checked; }).length;
+        all.checked = ticked === boxes.length;
+        all.indeterminate = ticked > 0 && ticked < boxes.length;
+        if (tally) tally.textContent = ticked + ' of ' + boxes.length;
+    }
     all.addEventListener('change', function () {
         boxes.forEach(function (box) { box.checked = all.checked; });
+        syncColumns();
     });
-    boxes.forEach(function (box) {
-        box.addEventListener('change', function () {
-            all.checked = boxes.every(function (b) { return b.checked; });
-            all.indeterminate = !all.checked && boxes.some(function (b) { return b.checked; });
-        });
-    });
-    all.indeterminate = !boxes.every(function (b) { return b.checked; })
-        && boxes.some(function (b) { return b.checked; });
+    boxes.forEach(function (box) { box.addEventListener('change', syncColumns); });
+    syncColumns();
 })();
 
 // ---- Employee list: results while you type ---------------------------------

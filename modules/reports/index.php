@@ -33,10 +33,11 @@ require __DIR__ . '/../../includes/header.php';
 <div class="card shadow-sm mb-4 d-print-none">
     <div class="card-body">
         <form method="get" id="report-filters">
-            <div class="row g-3">
-                <div class="col-lg-5">
-                    <label class="form-label small mb-1 fw-semibold">Report</label>
-                    <div class="form-check">
+            <div class="row g-4">
+                <!-- 1. What the report covers -->
+                <div class="col-xl-4 col-lg-6">
+                    <h2 class="h6 text-danger border-bottom pb-2 mb-3">1 · Report type</h2>
+                    <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="scope" value="overall" id="scope-overall"
                                <?= $f['scope'] === 'overall' ? 'checked' : '' ?>>
                         <label class="form-check-label" for="scope-overall">
@@ -53,7 +54,7 @@ require __DIR__ . '/../../includes/header.php';
                         </label>
                     </div>
                     <select class="form-select mt-2" name="department" id="report-department"
-                            <?= $f['scope'] === 'department' ? '' : 'disabled' ?>>
+                            aria-label="Department" <?= $f['scope'] === 'department' ? '' : 'disabled' ?>>
                         <option value="">Select a department…</option>
                         <?php foreach ($departments as $d): ?>
                             <option value="<?= (int)$d['department_id'] ?>" <?= $f['department'] === (int)$d['department_id'] ? 'selected' : '' ?>>
@@ -63,15 +64,17 @@ require __DIR__ . '/../../includes/header.php';
                     </select>
                 </div>
 
-                <div class="col-lg-3">
+                <!-- 2. Which employees -->
+                <div class="col-xl-3 col-lg-6">
+                    <h2 class="h6 text-danger border-bottom pb-2 mb-3">2 · Filters</h2>
                     <label class="form-label small mb-1" for="report-type">Applicant Type</label>
-                    <select class="form-select" name="type" id="report-type">
+                    <select class="form-select mb-3" name="type" id="report-type">
                         <option value="">All</option>
                         <option <?= $f['type'] === 'New' ? 'selected' : '' ?>>New</option>
                         <option <?= $f['type'] === 'Existing' ? 'selected' : '' ?>>Existing</option>
                     </select>
 
-                    <label class="form-label small mb-1 mt-3" for="report-status">Record Status</label>
+                    <label class="form-label small mb-1" for="report-status">Record Status</label>
                     <select class="form-select" name="status" id="report-status">
                         <option value="">All</option>
                         <?php foreach (['Applicant', 'Active', 'Inactive', 'Terminated'] as $s): ?>
@@ -80,16 +83,20 @@ require __DIR__ . '/../../includes/header.php';
                     </select>
                 </div>
 
-                <div class="col-lg-4">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small mb-0 fw-semibold">Include in report</label>
-                        <div class="form-check form-check-inline me-0">
-                            <input class="form-check-input" type="checkbox" id="columns-all"
-                                   <?= count($chosen) === count($columns) ? 'checked' : '' ?>>
-                            <label class="form-check-label small" for="columns-all">Select all</label>
-                        </div>
+                <!-- 3. Which columns -->
+                <div class="col-xl-5">
+                    <h2 class="h6 text-danger border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+                        <span>3 · Include in report</span>
+                        <span class="fw-normal small text-muted" id="columns-chosen-count"><?= count($chosen) ?> of <?= count($columns) ?></span>
+                    </h2>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="columns-all"
+                               <?= count($chosen) === count($columns) ? 'checked' : '' ?>>
+                        <label class="form-check-label fw-semibold" for="columns-all">Select all</label>
                     </div>
-                    <div class="border rounded p-2 overflow-auto" style="max-height:260px">
+                    <!-- Two or three columns of boxes, so all 22 fit without a
+                         scrollbar inside the card on a normal screen. -->
+                    <div class="report-columns border rounded p-2">
                         <?php foreach ($columns as $key => [$label, $_]): ?>
                             <div class="form-check">
                                 <input class="form-check-input report-column" type="checkbox" name="columns[]"
@@ -99,16 +106,13 @@ require __DIR__ . '/../../includes/header.php';
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <div class="form-text">
-                        Only ticked items appear in the report and its exports.
-                        <?php if (isset($_GET['columns']) && $chosen === ['name']): ?>
-                            <span class="text-danger d-block">Nothing was ticked, so the name alone is shown.</span>
-                        <?php endif; ?>
-                    </div>
+                    <?php if (isset($_GET['columns']) && $chosen === ['name']): ?>
+                        <div class="form-text text-danger">Nothing was ticked, so the name alone is shown.</div>
+                    <?php endif; ?>
                 </div>
             </div>
 
-            <div class="mt-3">
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
                 <button class="btn btn-danger"><i class="bi bi-funnel me-1"></i>Generate</button>
                 <a href="index.php" class="btn btn-outline-secondary">Reset</a>
             </div>
@@ -135,58 +139,59 @@ require __DIR__ . '/../../includes/header.php';
     <?php if (!$rows): ?>
         <div class="card-body text-center text-muted py-5">No records match the selected filters.</div>
     <?php else: ?>
-        <?php if ($f['scope'] === 'overall' && count($groups) > 1): ?>
+        <?php $grouped = $f['scope'] === 'overall' && count($groups) > 1; ?>
+
+        <?php if ($grouped): ?>
             <!-- Summary first: how many employees each department holds -->
-            <div class="card-body pb-0">
-                <h2 class="h6 text-danger border-bottom pb-2">Summary</h2>
-                <div class="table-responsive">
-                    <table class="table table-sm w-auto mb-0">
-                        <tbody>
-                        <?php foreach ($groups as $name => $members): ?>
-                            <tr>
-                                <td class="pe-4"><?= e($name) ?></td>
-                                <td class="text-end fw-semibold"><?= count($members) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <tr class="border-top">
-                            <td class="pe-4 fw-semibold">Total</td>
-                            <td class="text-end fw-semibold"><?= count($rows) ?></td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <div class="card-body pb-2">
+                <h2 class="h6 text-danger mb-2">Summary</h2>
+                <div class="report-summary">
+                    <?php foreach ($groups as $name => $members): ?>
+                        <div class="report-summary-item">
+                            <span class="text-truncate"><?= e($name) ?></span>
+                            <span class="badge text-bg-secondary ms-2"><?= count($members) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                    <div class="report-summary-item fw-semibold">
+                        <span>Total</span>
+                        <span class="badge text-bg-primary ms-2"><?= count($rows) ?></span>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php foreach ($groups as $name => $members): ?>
-            <?php if ($f['scope'] === 'overall'): ?>
-                <div class="card-body pb-1 pt-4">
-                    <h2 class="h6 text-danger border-bottom pb-2 mb-0">
-                        <?= e($name) ?> <span class="text-muted fw-normal">(<?= count($members) ?>)</span>
-                    </h2>
-                </div>
-            <?php endif; ?>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <?php foreach ($chosen as $key): ?>
-                                <th><?= e($columns[$key][0]) ?></th>
-                            <?php endforeach; ?>
-                        </tr>
-                    </thead>
+        <!-- One table for the whole report: the headings stay put and every
+             section lines up under the same columns, with a single scrollbar. -->
+        <div class="table-responsive report-table">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <?php foreach ($chosen as $key): ?>
+                            <th scope="col"><?= e($columns[$key][0]) ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <?php foreach ($groups as $name => $members): ?>
                     <tbody>
+                    <?php if ($grouped): ?>
+                        <tr class="report-group">
+                            <th scope="rowgroup" colspan="<?= count($chosen) ?>">
+                                <?= e($name) ?>
+                                <span class="fw-normal text-muted">· <?= count($members) ?> employee<?= count($members) === 1 ? '' : 's' ?></span>
+                            </th>
+                        </tr>
+                    <?php endif; ?>
                     <?php foreach ($members as $r): ?>
                         <tr>
                             <?php foreach ($chosen as $key): ?>
-                                <td><?= e($columns[$key][1]($r)) ?></td>
+                                <td class="<?= in_array($key, REPORT_WRAPPING_COLUMNS, true) ? 'report-wrap' : '' ?>"><?= e($columns[$key][1]($r)) ?></td>
                             <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
-                </table>
-            </div>
-        <?php endforeach; ?>
+                <?php endforeach; ?>
+            </table>
+        </div>
     <?php endif; ?>
 </div>
 <?php require __DIR__ . '/../../includes/footer.php'; ?>
