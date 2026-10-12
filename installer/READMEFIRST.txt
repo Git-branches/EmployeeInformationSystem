@@ -1,9 +1,22 @@
-EMPLOYEE INFORMATION SYSTEM  1.2.0
+EMPLOYEE INFORMATION SYSTEM  1.2.1
 
 Employee and applicant records, requirements monitoring, reports and backups.
 
-WHAT IS NEW IN 1.2.0
+WHAT IS NEW IN 1.2.1
 --------------------
+  * The employee list now filters as you type - no need to press Enter
+    or the search button. It also searches the middle name, the employee
+    number and the position, in any order.
+  * New report options: an Overall report that groups every employee
+    under their department with a summary of the department sizes, or a
+    report for one department only. Tick which information to include
+    (22 items, with Select all); only ticked items appear in the report,
+    the printout and the PDF/Excel exports.
+  * The menu and the top bar now stay in place while the page scrolls,
+    so they are always within reach on long lists and reports.
+
+WHAT WAS NEW IN 1.2.0
+---------------------
   * Employee name now has Surname, First Name, Middle Name (with a
     "No middle name" box) and Extension, and is shown everywhere as
     SURNAME, FIRST M. EXT. - for example ROMERO, RHON J. JR.
