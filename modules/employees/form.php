@@ -673,11 +673,19 @@ $emp_daily = daily_salary(is_numeric($salary) ? $salary : null);
             </div>
         </div>
     </div>
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white d-flex flex-wrap align-items-center gap-2">
         <button type="submit" class="btn btn-danger">
             <i class="bi bi-save me-1"></i><?= $is_edit ? 'Update Profile' : 'Save Employee' ?>
         </button>
         <a href="index.php" class="btn btn-outline-secondary">Cancel</a>
+        <!-- Empties the form and throws away the auto-saved draft, so an
+             abandoned entry does not come back on the next visit. -->
+        <button type="button" class="btn btn-outline-secondary" id="clear-form"
+                data-clear-confirm="<?= $is_edit
+                    ? 'Undo the changes you have made and go back to the saved details?'
+                    : 'Clear everything you have typed on this form?' ?>">
+            <i class="bi bi-eraser me-1"></i><?= $is_edit ? 'Undo Changes' : 'Clear Form' ?>
+        </button>
         <span class="text-muted small ms-2" id="autosave-status"></span>
     </div>
 </form>

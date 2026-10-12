@@ -69,6 +69,13 @@
         }
     }
 
+    /** Throw the draft away, so it is not restored on the next visit. */
+    function discard() {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) { /* storage unavailable — nothing to remove */ }
+    }
+
     restore();
 
     form.addEventListener('input', function () {
@@ -76,7 +83,43 @@
         timer = setTimeout(save, 600);
     });
 
-    form.addEventListener('submit', function () {
-        localStorage.removeItem(key);
-    });
+    form.addEventListener('submit', discard);
+
+    // "Clear Form" / "Undo Changes": empty the form back to how it arrived —
+    // blank when adding, the saved details when editing — and drop the draft.
+    // Without dropping it the entry would be restored on the next visit.
+    const clearButton = document.getElementById('clear-form');
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            if (!window.confirm(clearButton.dataset.clearConfirm)) return;
+
+            clearTimeout(timer);   // a pending auto-save would write it straight back
+            discard();
+            form.reset();          // back to the values the page was rendered with
+
+            // Clear what the browser does not reset on its own.
+            form.querySelectorAll('.is-invalid').forEach(function (el) {
+                el.classList.remove('is-invalid');
+                if (el.setCustomValidity) el.setCustomValidity('');
+            });
+            form.querySelectorAll('input[type="file"]').forEach(function (el) { el.value = ''; });
+
+            // Bring the parts of the page that follow what was typed — the
+            // name preview, the daily salary, the "no middle name" box — back
+            // in step. They listen for load, which is also how they catch up
+            // with a restored draft.
+            //
+            // The address lists are deliberately left alone: form.reset() has
+            // already put back the options the page was rendered with, and a
+            // change event here would clear the city and barangay instead.
+            window.dispatchEvent(new Event('load'));
+
+            if (statusEl) {
+                statusEl.textContent = 'Form cleared.';
+                statusEl.classList.remove('text-success');
+            }
+            const first = form.querySelector('input:not([type="hidden"]):not([disabled])');
+            if (first) first.focus();
+        });
+    }
 })();
