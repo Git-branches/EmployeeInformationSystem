@@ -335,8 +335,53 @@ main { min-width: 0; }
 .report-table {
     max-width: 100%;
     overflow-x: auto;
+    /* Leave the sideways scrollbar showing, so it is obvious there are
+       more columns to the right rather than the table looking cut off. */
+    scrollbar-gutter: stable;
 }
+.report-table::-webkit-scrollbar { height: 12px; }
+.report-table::-webkit-scrollbar-track { background: var(--eis-surface); border-radius: 6px; }
+.report-table::-webkit-scrollbar-thumb {
+    background: #b6c4c6;
+    border-radius: 6px;
+    border: 2px solid var(--eis-surface);
+}
+.report-table::-webkit-scrollbar-thumb:hover { background: #93a7aa; }
 .report-table > table { margin-bottom: 0; }
+
+/* Columns are sized to their content but capped, so a wide report needs
+   far less sideways scrolling without squeezing names into a ribbon.
+   Short values (dates, sex, status) stay on one line; only the genuinely
+   long ones — address, email, name, position — are allowed to wrap. */
+.report-table > table { width: auto; min-width: 100%; }
+.report-table :is(th, td) {
+    white-space: nowrap;
+    max-width: 16rem;
+}
+.report-table :is(th, td).report-wrap {
+    white-space: normal;
+    overflow-wrap: break-word;
+    min-width: 8rem;
+}
+
+/* The more columns were ticked, the smaller the type — the same idea as
+   the printed sheet, so a wide report needs little or no scrolling while
+   staying comfortably readable. It never goes below 12px. */
+[data-print-density="normal"] .report-table .table { font-size: .86rem; }
+[data-print-density="normal"] .report-table :is(td, th) { padding: .35rem .5rem; }
+[data-print-density="tight"]  .report-table .table { font-size: .8rem; }
+[data-print-density="tight"]  .report-table :is(td, th) { padding: .3rem .4rem; }
+[data-print-density="packed"] .report-table .table { font-size: .75rem; }
+[data-print-density="packed"] .report-table :is(td, th) { padding: .25rem .35rem; }
+/* Past seventeen columns the long text is held tighter still, so the
+   report comes as close to one screen as it can before scrolling. The
+   headings wrap too — several are longer than the values beneath them. */
+[data-print-density="packed"] .report-table :is(th, td) { max-width: 9rem; }
+[data-print-density="packed"] .report-table :is(th, td).report-wrap { min-width: 6.5rem; }
+[data-print-density="packed"] .report-table thead th {
+    white-space: normal;
+    overflow-wrap: break-word;
+}
 /* The column headings stay visible while a long list is scrolled. The
    table is its own scroll container, so they stick against it. */
 .report-table thead th {
@@ -347,10 +392,12 @@ main { min-width: 0; }
     background-color: #eef4f4;
     box-shadow: inset 0 -1px 0 var(--eis-line);
 }
-/* Employee No and Name stay in view while a wide report is scrolled
-   sideways, so a row can always be told apart. */
-.report-table th:first-child,
-.report-table td:first-child {
+/* The first column stays in view while a wide report is scrolled
+   sideways, so a row can always be told apart. The department band is
+   excluded: it is a `th` in the first position too, and would be given
+   this white background over its own. */
+.report-table thead th:first-child,
+.report-table tbody td:first-child {
     position: sticky;
     left: 0;
     z-index: 1;
@@ -359,27 +406,27 @@ main { min-width: 0; }
 }
 .report-table thead th:first-child { z-index: 3; background-color: #eef4f4; }
 .report-table tbody tr:hover td:first-child { background-color: #f0f7f6; }
-.report-group th { z-index: 2; }
-/* Short values read better on one line. The long ones (address, email)
-   may wrap, but never into a narrow ribbon of one or two characters:
-   below min-width the table scrolls sideways instead. */
-.report-table td { white-space: nowrap; }
-.report-table td.report-wrap {
-    white-space: normal;
-    min-width: 9rem;
-    max-width: 20rem;
-    overflow-wrap: break-word;
-}
 
-/* Department band inside the report table */
+/* Department band inside the report table. It spans every column, so it
+   is pinned to the left edge as well: scrolled sideways, the band would
+   otherwise leave its name behind. */
 .report-group th {
     position: sticky;
     top: 2.4rem;
-    z-index: 1;
+    left: 0;
+    z-index: 2;
     background-color: var(--eis-deep);
     color: #fff;
     font-weight: 600;
     letter-spacing: .02em;
+    /* The cell is as wide as the table; the text follows the viewport */
+    padding-left: 0;
+}
+.report-group th > span.report-band-label {
+    position: sticky;
+    left: 0;
+    display: inline-block;
+    padding-left: .5rem;
 }
 .report-group th .text-muted { color: rgba(255, 255, 255, .75) !important; }
 

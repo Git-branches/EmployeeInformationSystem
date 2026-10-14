@@ -289,6 +289,21 @@ function reformatKeepingCaret(field, format) {
     });
     boxes.forEach(function (box) { box.addEventListener('change', syncColumns); });
     syncColumns();
+
+    // Point out the columns off to the right, which are easy to miss
+    const table = document.querySelector('.report-table');
+    const hint = document.getElementById('scroll-hint');
+    if (table && hint) {
+        const showHint = function () {
+            const more = table.scrollWidth > table.clientWidth + 1;
+            // Hide it again once the far right has been reached
+            const atEnd = table.scrollLeft + table.clientWidth >= table.scrollWidth - 2;
+            hint.classList.toggle('d-none', !more || atEnd);
+        };
+        showHint();
+        table.addEventListener('scroll', showHint);
+        window.addEventListener('resize', showHint);
+    }
 })();
 
 // ---- Employee list: results while you type ---------------------------------

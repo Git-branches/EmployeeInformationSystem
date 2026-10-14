@@ -198,6 +198,11 @@ $density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (c
             </div>
         <?php endif; ?>
 
+        <?php // Says so when the table is wider than the screen, since the
+              // columns off to the right are easy to miss otherwise. ?>
+        <div class="small text-muted px-3 pb-2 d-none d-print-none" id="scroll-hint">
+            <i class="bi bi-arrow-left-right me-1"></i>Scroll sideways to see the remaining columns.
+        </div>
         <!-- One table for the whole report: the headings stay put and every
              section lines up under the same columns. It is deliberately not
              wrapped in .table-responsive — that would scroll the headings
@@ -215,9 +220,13 @@ $density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (c
                     <tbody>
                     <?php if ($grouped): ?>
                         <tr class="report-group">
+                            <?php // The label is pinned separately, so it stays in
+                                  // view when the band is scrolled sideways. ?>
                             <th scope="rowgroup" colspan="<?= count($chosen) ?>">
-                                <?= e($name) ?>
-                                <span class="fw-normal text-muted">· <?= count($members) ?> employee<?= count($members) === 1 ? '' : 's' ?></span>
+                                <span class="report-band-label">
+                                    <?= e($name) ?>
+                                    <span class="fw-normal text-muted">· <?= count($members) ?> employee<?= count($members) === 1 ? '' : 's' ?></span>
+                                </span>
                             </th>
                         </tr>
                     <?php endif; ?>
