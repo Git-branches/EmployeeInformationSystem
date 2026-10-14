@@ -465,6 +465,19 @@ main { min-width: 0; }
 }
 .report-columns .form-check { break-inside: avoid; }
 
+/* The signature block sits at the foot of the report, over on the right.
+   The name and designation come from the administrator's own profile. */
+.report-signatory {
+    display: flex;
+    padding-top: 2rem;
+}
+.report-signatory > div {
+    min-width: 16rem;
+    max-width: 22rem;
+    text-align: center;
+}
+.report-signatory .small { text-align: left; }
+
 /* ---- Print ----------------------------------------------------------- */
 @media print {
     body { background: #fff; }
@@ -496,6 +509,14 @@ main { min-width: 0; }
         overflow: visible;
     }
     .report-card, .report-card .card-body { display: block !important; }
+    /* The signature keeps its place on the right and is never split in two */
+    .report-signatory { break-inside: avoid; padding-top: 1.2rem; }
+    .report-signatory > div {
+        margin-left: auto;
+        margin-right: 0;
+        min-width: 0;
+        width: 40%;
+    }
     .report-card { break-inside: auto; }
     .report-summary { margin-bottom: .4rem; }
     .report-table thead th, .report-group th { position: static; }

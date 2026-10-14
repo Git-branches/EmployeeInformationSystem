@@ -228,6 +228,46 @@ function is_logged_in(): bool
 }
 
 /**
+ * The signed-in administrator's own row, or null when nobody is logged in.
+ * Read once per request: several parts of a page ask for it.
+ */
+function current_user(PDO $pdo): ?array
+{
+    static $user = null;
+    if ($user !== null) {
+        return $user;
+    }
+    if (!is_logged_in()) {
+        return null;
+    }
+    $stmt = $pdo->prepare(
+        'SELECT user_id, username, full_name, email, position, last_login
+         FROM users WHERE user_id = ?'
+    );
+    $stmt->execute([(int)$_SESSION['user_id']]);
+    $user = $stmt->fetch() ?: null;
+    return $user;
+}
+
+/**
+ * Name and designation to print under a report's signature line, taken from
+ * the administrator's own profile (Settings → Admin Profile) rather than
+ * being fixed in the markup. Falls back to the session name, and finally to
+ * the generic label, so a report is never left with a blank signatory.
+ */
+function report_signatory(PDO $pdo): array
+{
+    $user = current_user($pdo);
+    $name = trim((string)($user['full_name'] ?? ($_SESSION['full_name'] ?? '')));
+    $role = trim((string)($user['position'] ?? ''));
+
+    return [
+        'name'     => $name,
+        'position' => $role !== '' ? $role : 'Administrator',
+    ];
+}
+
+/**
  * Save an uploaded image (photo) and return its relative path, or null when
  * no file was sent. Throws RuntimeException with a user-friendly message.
  */

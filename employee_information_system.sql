@@ -266,6 +266,8 @@ CREATE TABLE `users` (
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `full_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `position` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
@@ -361,7 +363,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (`user_id`, `username`, `password_hash`, `full_name`, `last_login`, `created_at`) VALUES (1,'admin','$2y$10$v1WY31K3EPdmV7clJLtLKOn3KvptqDB.SjBwHdYfmh6ozABRepuOm','System Administrator',NULL,'2026-08-03 05:26:30');
+INSERT INTO `users` (`user_id`, `username`, `password_hash`, `full_name`, `email`, `position`, `last_login`, `created_at`) VALUES (1,'admin','$2y$10$v1WY31K3EPdmV7clJLtLKOn3KvptqDB.SjBwHdYfmh6ozABRepuOm','System Administrator',NULL,NULL,NULL,'2026-08-03 05:26:30');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

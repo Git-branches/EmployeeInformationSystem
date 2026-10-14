@@ -62,7 +62,12 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
             <li>
-                <a class="dropdown-item" href="<?= BASE_URL ?>/modules/auth/change_password.php">
+                <a class="dropdown-item" href="<?= BASE_URL ?>/modules/settings/index.php">
+                    <i class="bi bi-person-badge me-1"></i>Admin Profile
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>/modules/settings/index.php?tab=password">
                     <i class="bi bi-shield-lock me-1"></i>Change Password
                 </a>
             </li>

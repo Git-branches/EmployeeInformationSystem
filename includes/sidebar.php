@@ -15,6 +15,7 @@ $menu = [
     ['label' => 'Requirements', 'icon' => 'bi-card-checklist',     'href' => '/modules/requirements/monitor.php', 'match' => '/modules/requirements/'],
     ['label' => 'Reports',      'icon' => 'bi-file-earmark-text',  'href' => '/modules/reports/index.php',      'match' => '/modules/reports/'],
     ['label' => 'Backup',       'icon' => 'bi-cloud-arrow-up',     'href' => '/modules/backup/index.php',       'match' => '/modules/backup/'],
+    ['label' => 'Settings',     'icon' => 'bi-gear',               'href' => '/modules/settings/index.php',     'match' => '/modules/settings/'],
 ];
 ?>
 <aside class="sidebar offcanvas-lg offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarMenu" aria-label="Main menu">

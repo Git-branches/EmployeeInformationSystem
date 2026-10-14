@@ -205,3 +205,28 @@ JOIN (
 ) n ON n.employee_id = e.employee_id
 SET e.emergency_contact_no = CONCAT(SUBSTRING(n.d, 1, 4), '-', SUBSTRING(n.d, 5, 3), '-', SUBSTRING(n.d, 8, 4))
 WHERE n.d IS NOT NULL;
+
+-- ---- 005: administrator profile (designation printed on reports) ----
+SET @stmt = IF(
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME   = 'users'
+        AND COLUMN_NAME  = 'email') = 0,
+    "ALTER TABLE users ADD COLUMN email VARCHAR(100) NULL AFTER full_name",
+    'DO 0'
+);
+PREPARE eis_upgrade FROM @stmt;
+EXECUTE eis_upgrade;
+DEALLOCATE PREPARE eis_upgrade;
+
+SET @stmt = IF(
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME   = 'users'
+        AND COLUMN_NAME  = 'position') = 0,
+    "ALTER TABLE users ADD COLUMN position VARCHAR(100) NULL AFTER email",
+    'DO 0'
+);
+PREPARE eis_upgrade FROM @stmt;
+EXECUTE eis_upgrade;
+DEALLOCATE PREPARE eis_upgrade;

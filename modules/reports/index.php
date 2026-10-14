@@ -16,6 +16,10 @@ $columns = report_columns();
 $chosen  = $f['columns'];
 $groups  = report_groups($rows);
 
+// Who signs the printed report: the administrator's own saved name and
+// designation, from Settings → Admin Profile.
+$signatory = report_signatory($pdo);
+
 $departments = $pdo->query('SELECT department_id, department_name FROM departments ORDER BY department_name')->fetchAll();
 
 $page_title = 'Reports';
@@ -250,6 +254,15 @@ $density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (c
                     </tbody>
                 <?php endforeach; ?>
             </table>
+        </div>
+
+        <?php // Signed by whoever generated it — Settings → Admin Profile ?>
+        <div class="card-body report-signatory">
+            <div class="ms-auto">
+                <div class="small text-muted mb-4">Prepared by:</div>
+                <div class="fw-semibold text-uppercase"><?= e($signatory['name']) ?></div>
+                <div class="border-top pt-1"><?= e($signatory['position']) ?></div>
+            </div>
         </div>
     <?php endif; ?>
 </div>
