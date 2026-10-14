@@ -200,7 +200,7 @@ $density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (c
 
         <?php // Says so when the table is wider than the screen, since the
               // columns off to the right are easy to miss otherwise. ?>
-        <div class="px-3 pb-2 d-none d-print-none" id="scroll-hint">
+        <div class="px-3 pb-2 d-none d-print-none text-center" id="scroll-hint">
             <div class="alert alert-warning py-2 px-3 mb-0 small d-inline-flex align-items-center">
                 <i class="bi bi-arrow-left-right me-2 fs-6"></i>
                 <span>

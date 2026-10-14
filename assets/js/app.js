@@ -301,11 +301,10 @@ function reformatKeepingCaret(field, format) {
     let showHint = function () {};
     if (hint) {
         showHint = function () {
-            // Hide it again once the far right has been reached. The margin
-            // covers the scrollbar's own width, which scrollWidth counts but
-            // scrollLeft can never reach.
-            const atEnd = table.scrollLeft + table.clientWidth >= table.scrollWidth - 20;
-            hint.classList.toggle('d-none', !scrollable() || atEnd);
+            // It stays up for as long as the table scrolls at all, including
+            // at the far right: it is where the keyboard instructions live,
+            // and they are needed to get back as much as to get across.
+            hint.classList.toggle('d-none', !scrollable());
         };
         showHint();
         table.addEventListener('scroll', showHint);
