@@ -395,6 +395,14 @@ main { min-width: 0; }
     .sidebar, nav.navbar, .btn, .alert, form.card { display: none !important; }
     .card { box-shadow: none; border-radius: 0; }
 
+    /* The screen heading ("Reports", "Employees" and the like) names the
+       page, not the document; the report carries its own title. */
+    main > .d-flex.justify-content-between { display: none !important; }
+
+    /* Ink, not screen colour: print the text black */
+    body, .card, .table, .table td, .table th { color: #000 !important; }
+    .text-muted, .small.text-muted { color: #444 !important; }
+
     /* On paper there is no viewport to fit: undo the app shell so the
        whole page prints instead of just the part that was on screen. */
     html, body, body > .d-flex, main {
@@ -404,11 +412,16 @@ main { min-width: 0; }
     }
     main { padding: 0 !important; }
 
-    /* On paper nothing scrolls: show the report whole and let it wrap */
+    /* On paper nothing scrolls: show the report whole and let it wrap.
+       The card and its body must not add a block of their own either, or
+       the table is pushed to the next sheet behind an empty gap. */
     .report-table {
         max-height: none;
         overflow: visible;
     }
+    .report-card, .report-card .card-body { display: block !important; }
+    .report-card { break-inside: auto; }
+    .report-summary { margin-bottom: .4rem; }
     .report-table thead th, .report-group th { position: static; }
     .report-group th {
         background-color: #eef4f4 !important;
@@ -459,9 +472,14 @@ main { min-width: 0; }
     .card-body .pb-2 { padding-bottom: .15rem !important; }
     .card-body .row.mb-4 { margin-bottom: .3rem !important; }
 
-    /* Never split a section or a row across two sheets */
-    table, tr, td, th { break-inside: avoid; }
+    /* Keep a single row whole, and never leave a heading stranded at the
+       foot of a sheet. Whole tables are deliberately NOT protected: a long
+       report table must be allowed to flow onto the next sheet, otherwise
+       it is pushed there entire and leaves the first sheet half empty. */
+    tr, td, th { break-inside: avoid; }
     h2, h3 { break-after: avoid; }
+    /* The information form's own blocks are short enough to keep together */
+    .card-body table.table-borderless { break-inside: avoid; }
 
     /* The signature block belongs under the form, not alone on a second page */
     .mt-5.pt-4 {
