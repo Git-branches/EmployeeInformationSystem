@@ -212,6 +212,13 @@ if ($format === 'xlsx') {
         $line++;   // blank line between sections
     }
 
+    // Signed off the same way as the printed report and the PDF
+    $line++;
+    $sheet->fromArray(['Prepared by:'], null, 'A' . $line++);
+    $sheet->fromArray([mb_strtoupper($signatory['name'])], null, 'A' . $line);
+    $sheet->getStyle('A' . $line++)->getFont()->setBold(true);
+    $sheet->fromArray([$signatory['position']], null, 'A' . $line);
+
     foreach (range(1, max(1, count($chosen))) as $index) {
         $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($index))->setAutoSize(true);
     }
@@ -257,20 +264,33 @@ if (!$rows) {
     }
 }
 
+// The sheet is a fixed width, so the type has to come down as more columns
+// are ticked — the same steps the screen uses. Without this Dompdf sizes the
+// table from its content and the right-hand columns run off the paper.
+$count = count($chosen);
+[$size, $pad] = $count <= 8  ? ['9px',   '3px 5px']
+              : ($count <= 12 ? ['7.5px', '2px 3px']
+              : ($count <= 17 ? ['6px',   '1.5px 2px']
+              :                 ['5px',   '1px 1.5px']));
+
 $html = '
 <style>
     body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #222; }
     h1 { font-size: 15px; margin: 0; } .sub { color: #666; margin-bottom: 10px; }
     h2 { font-size: 11px; margin: 14px 0 4px; color: #c8102e;
          border-bottom: 1px solid #c8102e; padding-bottom: 2px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #999; padding: 3px 5px; text-align: left; }
+    /* Fixed layout divides the sheet evenly instead of letting the widest
+       value decide — that is what pushed the last columns off the page. */
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { border: 1px solid #999; padding: ' . $pad . '; text-align: left;
+             font-size: ' . $size . '; word-wrap: break-word; overflow-wrap: break-word;
+             vertical-align: top; }
     th { background: #c8102e; color: #fff; }
-    table.summary { width: auto; }
-    table.summary td { border: none; padding: 1px 12px 1px 0; }
+    table.summary { width: auto; table-layout: auto; }
+    table.summary td { border: none; padding: 1px 12px 1px 0; font-size: 10px; }
     /* Signature block: no borders, and never split across sheets */
-    table.sig { width: 100%; margin-top: 26px; page-break-inside: avoid; }
-    table.sig td { border: none; width: 50%; vertical-align: bottom; }
+    table.sig { width: 100%; margin-top: 26px; page-break-inside: avoid; table-layout: auto; }
+    table.sig td { border: none; width: 50%; vertical-align: bottom; font-size: 10px; }
     table.sig .who { text-transform: uppercase; font-weight: bold; }
     table.sig .line { border-top: 1px solid #222; padding-top: 3px; width: 60%; }
 </style>
