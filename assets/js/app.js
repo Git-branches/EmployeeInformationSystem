@@ -293,17 +293,55 @@ function reformatKeepingCaret(field, format) {
     // Point out the columns off to the right, which are easy to miss
     const table = document.querySelector('.report-table');
     const hint = document.getElementById('scroll-hint');
-    if (table && hint) {
-        const showHint = function () {
-            const more = table.scrollWidth > table.clientWidth + 1;
-            // Hide it again once the far right has been reached
-            const atEnd = table.scrollLeft + table.clientWidth >= table.scrollWidth - 2;
-            hint.classList.toggle('d-none', !more || atEnd);
+    if (!table) return;
+
+    function scrollable() {
+        return table.scrollWidth > table.clientWidth + 1;
+    }
+    let showHint = function () {};
+    if (hint) {
+        showHint = function () {
+            // Hide it again once the far right has been reached. The margin
+            // covers the scrollbar's own width, which scrollWidth counts but
+            // scrollLeft can never reach.
+            const atEnd = table.scrollLeft + table.clientWidth >= table.scrollWidth - 20;
+            hint.classList.toggle('d-none', !scrollable() || atEnd);
         };
         showHint();
         table.addEventListener('scroll', showHint);
         window.addEventListener('resize', showHint);
     }
+
+    // Clicking the table hands it the keyboard, so the arrow keys move
+    // across the columns. Without this a browser scrolls the page instead.
+    table.addEventListener('keydown', function (event) {
+        if (!scrollable()) return;
+        const step = event.shiftKey ? table.clientWidth : 80;
+        let moved = true;
+        switch (event.key) {
+            case 'ArrowRight': table.scrollLeft += step; break;
+            case 'ArrowLeft':  table.scrollLeft -= step; break;
+            case 'Home':       table.scrollLeft = 0; break;
+            case 'End':        table.scrollLeft = table.scrollWidth; break;
+            case 'PageDown':   table.scrollLeft += table.clientWidth; break;
+            case 'PageUp':     table.scrollLeft -= table.clientWidth; break;
+            default: moved = false;
+        }
+        // Stop the page scrolling as well when the table handled the key
+        if (moved) {
+            event.preventDefault();
+            // Setting scrollLeft outright fires no scroll event in every
+            // browser, so the hint is brought up to date here too.
+            showHint();
+        }
+    });
+
+    // Only worth a focus ring while there is something to scroll to
+    function syncFocusable() {
+        table.classList.toggle('is-scrollable', scrollable());
+    }
+    syncFocusable();
+    window.addEventListener('resize', syncFocusable);
 })();
 
 // ---- Employee list: results while you type ---------------------------------

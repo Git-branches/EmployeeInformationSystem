@@ -200,14 +200,24 @@ $density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (c
 
         <?php // Says so when the table is wider than the screen, since the
               // columns off to the right are easy to miss otherwise. ?>
-        <div class="small text-muted px-3 pb-2 d-none d-print-none" id="scroll-hint">
-            <i class="bi bi-arrow-left-right me-1"></i>Scroll sideways to see the remaining columns.
+        <div class="px-3 pb-2 d-none d-print-none" id="scroll-hint">
+            <div class="alert alert-warning py-2 px-3 mb-0 small d-inline-flex align-items-center">
+                <i class="bi bi-arrow-left-right me-2 fs-6"></i>
+                <span>
+                    <strong>More columns to the right.</strong>
+                    Click the table, then use <kbd>←</kbd> <kbd>→</kbd> to move across it.
+                </span>
+            </div>
         </div>
         <!-- One table for the whole report: the headings stay put and every
              section lines up under the same columns. It is deliberately not
              wrapped in .table-responsive — that would scroll the headings
-             out of view (see .report-table in style.css). -->
-        <div class="report-table">
+             out of view (see .report-table in style.css).
+             tabindex makes it focusable, so the arrow keys move across it
+             once it is clicked; the region role tells a screen reader the
+             same thing. -->
+        <div class="report-table" tabindex="0" role="region"
+             aria-label="Report table — use the arrow keys to scroll across the columns">
             <table class="table table-sm table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>

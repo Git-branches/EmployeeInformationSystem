@@ -349,6 +349,15 @@ main { min-width: 0; }
 .report-table::-webkit-scrollbar-thumb:hover { background: #93a7aa; }
 .report-table > table { margin-bottom: 0; }
 
+/* Clicking the table gives it the keyboard, so the arrow keys move across
+   the columns. The ring shows which element the keys are driving. */
+.report-table:focus { outline: none; }
+.report-table.is-scrollable:focus-visible,
+.report-table.is-scrollable:focus {
+    outline: 2px solid var(--eis-accent);
+    outline-offset: -2px;
+}
+
 /* Columns are sized to their content but capped, so a wide report needs
    far less sideways scrolling without squeezing names into a ribbon.
    Short values (dates, sex, status) stay on one line; only the genuinely
