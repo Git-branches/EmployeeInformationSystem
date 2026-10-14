@@ -266,11 +266,22 @@ function reformatKeepingCaret(field, format) {
     const boxes = Array.from(form.querySelectorAll('.report-column'));
     const tally = document.getElementById('columns-chosen-count');
 
+    // About what an A4 sheet holds before the type has to shrink too far
+    const COMFORTABLE_COLUMNS = 12;
+    const warning = document.getElementById('columns-warning');
+    const warningText = document.getElementById('columns-warning-text');
+
     function syncColumns() {
         const ticked = boxes.filter(function (b) { return b.checked; }).length;
         all.checked = ticked === boxes.length;
         all.indeterminate = ticked > 0 && ticked < boxes.length;
         if (tally) tally.textContent = ticked + ' of ' + boxes.length;
+        if (warning) {
+            warning.classList.toggle('d-none', ticked <= COMFORTABLE_COLUMNS);
+            if (warningText) {
+                warningText.textContent = ticked + ' columns will not fit a printed sheet comfortably.';
+            }
+        }
     }
     all.addEventListener('change', function () {
         boxes.forEach(function (box) { box.checked = all.checked; });

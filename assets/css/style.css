@@ -328,10 +328,17 @@ main { min-width: 0; }
    stay put either way.
    The card around it must not clip either, or the table would be cut off
    at the card's edge instead of reaching main's scroll area. */
-.report-card { overflow: visible; }
+/* The card keeps its own edges: a wide report scrolls inside it rather
+   than spilling across the page. `clip` trims without becoming a scroll
+   container, which would capture the sticky headings. */
+.report-card { overflow: clip; }
+.report-table {
+    max-width: 100%;
+    overflow-x: auto;
+}
 .report-table > table { margin-bottom: 0; }
-/* The column headings stay visible while a long list is scrolled. They
-   stop right under the navbar, which is the top of the main column. */
+/* The column headings stay visible while a long list is scrolled. The
+   table is its own scroll container, so they stick against it. */
 .report-table thead th {
     position: sticky;
     top: 0;
@@ -340,6 +347,19 @@ main { min-width: 0; }
     background-color: #eef4f4;
     box-shadow: inset 0 -1px 0 var(--eis-line);
 }
+/* Employee No and Name stay in view while a wide report is scrolled
+   sideways, so a row can always be told apart. */
+.report-table th:first-child,
+.report-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: inset -1px 0 0 var(--eis-line);
+}
+.report-table thead th:first-child { z-index: 3; background-color: #eef4f4; }
+.report-table tbody tr:hover td:first-child { background-color: #f0f7f6; }
+.report-group th { z-index: 2; }
 /* Short values read better on one line. The long ones (address, email)
    may wrap, but never into a narrow ribbon of one or two characters:
    below min-width the table scrolls sideways instead. */
@@ -437,9 +457,32 @@ main { min-width: 0; }
        so the right-hand columns are not cut off. Only the employee list
        report asks for landscape — see .report-page below. Everything else,
        the information form above all, stays portrait. */
-    .report-table table { width: 100%; table-layout: auto; }
-    .report-table .table { font-size: .68rem; }
-    .report-table td, .report-table th { padding: .2rem .3rem; }
+    /* The table is sized from the number of ticked columns, so a wide
+       report still lands within the sheet instead of running off its
+       right-hand edge. Beyond about 17 columns the type is as small as is
+       worth printing — the page warns about that before it is printed. */
+    .report-table table { width: 100%; table-layout: fixed; }
+    /* Headings wrap too: kept on one line they overlap their neighbours
+       once the columns are narrow. */
+    .report-table td, .report-table th {
+        overflow-wrap: anywhere;
+        white-space: normal !important;
+        vertical-align: top;
+    }
+    [data-print-density="roomy"]  .report-table .table { font-size: .72rem; }
+    [data-print-density="roomy"]  .report-table :is(td, th) { padding: .2rem .35rem; }
+    [data-print-density="normal"] .report-table .table { font-size: .62rem; }
+    [data-print-density="normal"] .report-table :is(td, th) { padding: .15rem .25rem; }
+    [data-print-density="tight"]  .report-table .table { font-size: .52rem; }
+    [data-print-density="tight"]  .report-table :is(td, th) { padding: .1rem .18rem; }
+    [data-print-density="packed"] .report-table .table { font-size: .44rem; }
+    [data-print-density="packed"] .report-table :is(td, th) { padding: .06rem .12rem; }
+
+    /* On paper the frozen first column is pointless and would overlap */
+    .report-table :is(th, td):first-child {
+        position: static !important;
+        box-shadow: none !important;
+    }
     /* Keep a department's heading with at least some of its rows */
     .report-group { break-after: avoid; }
     thead { display: table-header-group; }

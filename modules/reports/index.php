@@ -125,6 +125,13 @@ require __DIR__ . '/../../includes/header.php';
                             ? 'Only ticked items appear in the report and its exports.'
                             : 'Tick the information to include, or use Select all.' ?>
                     </div>
+                    <?php // Twelve columns is about what an A4 sheet holds comfortably. ?>
+                    <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small<?= count($chosen) > 12 ? '' : ' d-none' ?>"
+                         id="columns-warning">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <span id="columns-warning-text"><?= count($chosen) ?> columns will not fit a printed sheet comfortably.</span>
+                        Twelve or fewer prints best — or use <strong>Export Excel</strong>, which has no width limit.
+                    </div>
                 </div>
             </div>
 
@@ -143,7 +150,12 @@ require __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<div class="card shadow-sm report-card">
+<?php
+// How tightly the printed table has to be packed depends on how many
+// columns were ticked; the CSS sizes the type from this.
+$density = count($chosen) <= 8 ? 'roomy' : (count($chosen) <= 12 ? 'normal' : (count($chosen) <= 17 ? 'tight' : 'packed'));
+?>
+<div class="card shadow-sm report-card" data-columns="<?= count($chosen) ?>" data-print-density="<?= $density ?>">
     <div class="card-header bg-white">
         <div class="fw-semibold"><?= e($title) ?></div>
         <div class="small text-muted">
