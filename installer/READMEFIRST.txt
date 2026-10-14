@@ -1,9 +1,27 @@
-EMPLOYEE INFORMATION SYSTEM  1.2.2
+EMPLOYEE INFORMATION SYSTEM  1.3.0
 
 Employee and applicant records, requirements monitoring, reports and backups.
 
-WHAT IS NEW IN 1.2.2
+WHAT IS NEW IN 1.3.0
 --------------------
+  * New Settings page, under the menu on the left. Your own account
+    details live here: full name, username, position/designation and
+    e-mail address. The password form has moved here too, beside them.
+  * Reports are now signed by whoever generated them. The signature at
+    the foot of a report carries the name and designation saved in
+    Settings, instead of the fixed word "Administrator". Change them in
+    Settings and the next report you generate shows the new details -
+    on screen, on paper, in the PDF and in the Excel file.
+  * A report with every column ticked now fits the printed sheet. Before,
+    the columns on the right ran off the edge of the paper and were lost.
+  * The Excel export now carries the signature as well; previously it
+    ended at the last record.
+  * A wide report on screen is easier to move around: click the table and
+    use the arrow keys. The reminder that there are more columns to the
+    right now stays in view until every column has been seen.
+
+WHAT WAS NEW IN 1.2.2
+---------------------
   * New "Clear Form" button on Add Employee, so a half-filled entry you
     walked away from can be thrown out in one go instead of field by
     field. On Edit it reads "Undo Changes" and puts back the saved
