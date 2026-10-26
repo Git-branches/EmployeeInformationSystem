@@ -21,7 +21,22 @@
       "Bash(node -e ' *)",
       "Bash(curl -s -b /tmp/sk \"http://127.0.0.1:8780/modules/reports/index.php?scope=overall&columns%5B%5D=name&columns%5B%5D=school_assignment\" -o rep.html)",
       "Bash(curl -s -b /tmp/sk \"http://127.0.0.1:8780/modules/reports/index.php?scope=overall&columns%5B%5D=name&columns%5B%5D=school_assignment\")",
-      "Bash(rm -f school.js vshot.js view-school.png school-page.png rep.html sk stok ex*.txt)"
+      "Bash(rm -f school.js vshot.js view-school.png school-page.png rep.html sk stok ex*.txt)",
+      "Bash(grep \"INSERT INTO \\\\`users\\\\`\" seeddata.sql)",
+      "Bash(grep \"INSERT INTO \\\\`users\\\\`\" /c/laragon/www/EmployeeInformationSystem/employee_information_system.sql)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -N -e \"SELECT department_name FROM departments ORDER BY department_name\")",
+      "Bash(grep \"INSERT INTO \\\\`departments\\\\`\" /c/laragon/www/EmployeeInformationSystem/employee_information_system.sql)",
+      "Bash(C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe -uroot -e 'DROP DATABASE IF EXISTS eis_cmp; CREATE DATABASE eis_cmp')",
+      "Bash(C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe -uroot eis_cmp)",
+      "Bash(C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysqldump.exe -uroot --no-data --skip-comments --skip-dump-date --compact eis_cmp)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot -e \"DROP DATABASE IF EXISTS eis_cmp\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File build.ps1)",
+      "Bash(powershell -Command \"\\(Get-Item dist\\\\EmployeeInformationSystem_Setup.exe\\).VersionInfo | Select-Object FileVersion | Format-List\")",
+      "Bash(grep -c \"INSERT INTO \\\\`employees\\\\`\" build/www/employee_information_system.sql)",
+      "Bash(grep \"INSERT INTO \\\\`departments\\\\`\\\\|INSERT INTO \\\\`users\\\\`\" build/www/employee_information_system.sql)",
+      "Bash(node v140.js)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot -e \"DROP DATABASE IF EXISTS eis_v140; DROP DATABASE IF EXISTS eis_old13\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT COUNT\\(*\\) AS employees FROM employees; SELECT COUNT\\(*\\) AS schools FROM school_assignments\")"
     ]
   }
 }

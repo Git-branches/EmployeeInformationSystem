@@ -1,9 +1,22 @@
-EMPLOYEE INFORMATION SYSTEM  1.3.0
+EMPLOYEE INFORMATION SYSTEM  1.4.0
 
 Employee and applicant records, requirements monitoring, reports and backups.
 
-WHAT IS NEW IN 1.3.0
+WHAT IS NEW IN 1.4.0
 --------------------
+  * New School Assignment: where an employee is actually posted, as
+    against the department they belong to. Keep the list of schools or
+    workplaces under "School Assignment" in the menu, the same way you
+    keep Departments and Positions, and it appears as a choice on the
+    Add Employee form.
+  * An employee's school assignment is shown on their profile, under
+    their position, and on the printed Information Form and its PDF.
+  * Reports can include it too: tick "School Assignment" among the
+    information to include, and it appears in the report and in the
+    PDF and Excel exports.
+
+WHAT WAS NEW IN 1.3.0
+---------------------
   * New Settings page, under the menu on the left. Your own account
     details live here: full name, username, position/designation and
     e-mail address. The password form has moved here too, beside them.
