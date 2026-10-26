@@ -132,6 +132,7 @@ if (isset($_GET['form_id'])) {
     <table class="info">
         <tr><td class="lbl">Department</td><td>' . e($emp['department_name'] ?? 'Unassigned') . '</td></tr>
         <tr><td class="lbl">Position</td><td>' . e($emp['position'] ?? '—') . '</td></tr>
+        <tr><td class="lbl">School Assignment</td><td>' . e($emp['school_assignment'] ?? '—') . '</td></tr>
         <tr><td class="lbl">Applicant Type</td><td>' . e($emp['applicant_type']) . '</td></tr>
         <tr><td class="lbl">Employment Status</td><td>' . e($emp['appointment_status'] ?? '—') . '</td></tr>
         <tr><td class="lbl">Record Status</td><td>' . e($emp['employment_status']) . '</td></tr>

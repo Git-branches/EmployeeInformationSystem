@@ -86,7 +86,15 @@ require __DIR__ . '/../../includes/header.php';
                     <i class="bi bi-person-circle text-secondary" style="font-size:7rem"></i>
                 <?php endif; ?>
                 <h2 class="h5 mb-1"><?= e(employee_display_name($emp)) ?></h2>
-                <div class="text-muted mb-2"><?= e($emp['position'] ?? 'No position') ?></div>
+                <div class="text-muted mb-1"><?= e($emp['position'] ?? 'No position') ?></div>
+                <?php // Where they are posted, under the position they hold ?>
+                <?php if (!empty($emp['school_assignment'])): ?>
+                    <div class="small text-muted mb-2">
+                        <i class="bi bi-building me-1"></i><?= e($emp['school_assignment']) ?>
+                    </div>
+                <?php else: ?>
+                    <div class="mb-2"></div>
+                <?php endif; ?>
                 <span class="badge <?= $status_badge[$emp['employment_status']] ?>"><?= e($emp['employment_status']) ?></span>
                 <?php if ($emp['appointment_status']): ?>
                     <span class="badge text-bg-light border"><?= e($emp['appointment_status']) ?></span>

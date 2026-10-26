@@ -28,6 +28,7 @@ function report_columns(): array
         'address'         => ['Address', fn(array $r) => $dash($r['address'])],
         'department_name' => ['Department', fn(array $r) => $r['department_name'] ?? 'Unassigned'],
         'position'        => ['Position', fn(array $r) => $dash($r['position'])],
+        'school_assignment' => ['School Assignment', fn(array $r) => $dash($r['school_assignment'])],
         'applicant_type'  => ['Type', fn(array $r) => $dash($r['applicant_type'])],
         'employment_status' => ['Record Status', fn(array $r) => $dash($r['employment_status'])],
         'appointment_status' => ['Employment Status', fn(array $r) => $dash($r['appointment_status'])],
@@ -44,7 +45,7 @@ function report_columns(): array
 }
 
 /** Columns whose text is long enough to wrap rather than widen the table. */
-const REPORT_WRAPPING_COLUMNS = ['address', 'email', 'name', 'position', 'department_name'];
+const REPORT_WRAPPING_COLUMNS = ['address', 'email', 'name', 'position', 'department_name', 'school_assignment'];
 
 /**
  * Nothing is ticked until the administrator chooses: the report is built
@@ -121,7 +122,7 @@ function report_rows(PDO $pdo, array $f): array
                    e.name_extension, e.birthdate, e.sex, e.civil_status,
                    e.contact_no, e.email, e.address,
                    e.sss_no, e.philhealth_no, e.pagibig_no, e.tin_no, e.gsis_no,
-                   d.department_name, e.position,
+                   d.department_name, e.position, e.school_assignment,
                    e.applicant_type, e.employment_status, s.status_name AS appointment_status,
                    e.date_hired, e.monthly_salary,
                    SUM(er.status IN ("Missing","Incomplete")) AS pending_reqs

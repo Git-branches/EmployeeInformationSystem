@@ -230,3 +230,47 @@ SET @stmt = IF(
 PREPARE eis_upgrade FROM @stmt;
 EXECUTE eis_upgrade;
 DEALLOCATE PREPARE eis_upgrade;
+
+-- ---- 006: school assignment (where an employee is posted) ----
+CREATE TABLE IF NOT EXISTS school_assignments (
+    school_assignment_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    school_name          VARCHAR(150) NOT NULL,
+    description          VARCHAR(255) NULL,
+    PRIMARY KEY (school_assignment_id),
+    UNIQUE KEY uq_school_assignments_name (school_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @stmt = IF(
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME   = 'employees'
+        AND COLUMN_NAME  = 'school_assignment_id') = 0,
+    "ALTER TABLE employees ADD COLUMN school_assignment_id INT UNSIGNED NULL AFTER position",
+    'DO 0'
+);
+PREPARE eis_upgrade FROM @stmt;
+EXECUTE eis_upgrade;
+DEALLOCATE PREPARE eis_upgrade;
+
+SET @stmt = IF(
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME   = 'employees'
+        AND COLUMN_NAME  = 'school_assignment') = 0,
+    "ALTER TABLE employees ADD COLUMN school_assignment VARCHAR(150) NULL COMMENT 'Name as at the time of saving, so reports survive a rename' AFTER school_assignment_id",
+    'DO 0'
+);
+PREPARE eis_upgrade FROM @stmt;
+EXECUTE eis_upgrade;
+DEALLOCATE PREPARE eis_upgrade;
+
+SET @stmt = IF(
+    (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'employees'
+        AND CONSTRAINT_NAME = 'fk_employees_school_assignment') = 0,
+    "ALTER TABLE employees ADD CONSTRAINT fk_employees_school_assignment FOREIGN KEY (school_assignment_id) REFERENCES school_assignments (school_assignment_id) ON UPDATE CASCADE ON DELETE SET NULL",
+    'DO 0'
+);
+PREPARE eis_upgrade FROM @stmt;
+EXECUTE eis_upgrade;
+DEALLOCATE PREPARE eis_upgrade;

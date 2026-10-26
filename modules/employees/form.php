@@ -21,6 +21,7 @@ $EXTENSIONS   = ['JR.', 'SR.', 'II', 'III', 'IV', 'V'];
 
 $departments = $pdo->query('SELECT department_id, department_name FROM departments ORDER BY department_name')->fetchAll();
 $positions   = $pdo->query('SELECT position_id, position_name FROM positions ORDER BY position_name')->fetchAll();
+$schools     = $pdo->query('SELECT school_assignment_id, school_name FROM school_assignments ORDER BY school_name')->fetchAll();
 $emp_statuses = $pdo->query('SELECT employment_status_id, status_name FROM employment_statuses ORDER BY status_name')->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -68,8 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $no_middle = $flag('no_middle_name');
     $position_id = (int)($_POST['position_id'] ?? 0) ?: null;
+    $school_id   = (int)($_POST['school_assignment_id'] ?? 0) ?: null;
     $status_id   = (int)($_POST['employment_status_id'] ?? 0) ?: null;
     $position_names = array_column($positions, 'position_name', 'position_id');
+    $school_names   = array_column($schools, 'school_name', 'school_assignment_id');
     $status_names   = array_column($emp_statuses, 'status_name', 'employment_status_id');
 
     $data = [
@@ -126,6 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'department_id'        => (int)($_POST['department_id'] ?? 0) ?: null,
         'position_id'          => $position_id,
         'position'             => $position_id !== null ? ($position_names[$position_id] ?? null) : null,
+        'school_assignment_id' => $school_id,
+        'school_assignment'    => $school_id !== null ? ($school_names[$school_id] ?? null) : null,
         'applicant_type'       => (string)($_POST['applicant_type'] ?? 'New'),
         'employment_status'    => (string)($_POST['employment_status'] ?? 'Applicant'),
         'employment_status_id' => $status_id,
@@ -180,6 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($position_id !== null && !isset($position_names[$position_id])) {
         $errors['position_id'] = 'That position no longer exists. Please choose another.';
+    }
+    if ($school_id !== null && !isset($school_names[$school_id])) {
+        $errors['school_assignment_id'] = 'That school assignment no longer exists. Please choose another.';
     }
     if ($status_id !== null && !isset($status_names[$status_id])) {
         $errors['employment_status_id'] = 'That employment status no longer exists. Please choose another.';
@@ -604,6 +612,24 @@ $emp_daily = daily_salary(is_numeric($salary) ? $salary : null);
                 <?php endif; ?>
                 <?php if (!$positions): ?>
                     <div class="form-text">No positions yet — <a href="<?= BASE_URL ?>/modules/positions/index.php">add them in Positions</a>.</div>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <?php // Where the employee is actually posted; the list is
+                      // managed under School Assignment in the menu. ?>
+                <label class="form-label" for="school_assignment_id">School Assignment</label>
+                <select class="form-select<?= $bad('school_assignment_id') ?>" id="school_assignment_id" name="school_assignment_id">
+                    <option value="">No school assignment</option>
+                    <?php foreach ($schools as $s): ?>
+                        <option value="<?= (int)$s['school_assignment_id'] ?>"
+                            <?= (int)($employee['school_assignment_id'] ?? 0) === (int)$s['school_assignment_id'] ? 'selected' : '' ?>>
+                            <?= e($s['school_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?= $msg('school_assignment_id') ?>
+                <?php if (!$schools): ?>
+                    <div class="form-text">None yet — <a href="<?= BASE_URL ?>/modules/school_assignments/index.php">add them in School Assignment</a>.</div>
                 <?php endif; ?>
             </div>
             <div class="col-md-6 col-lg-3">

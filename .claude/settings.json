@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT department_id, department_name, description FROM departments ORDER BY department_name\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SHOW CREATE TABLE positions\\\\G\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"DESCRIBE school_assignments; SELECT column_name, data_type FROM information_schema.columns WHERE table_schema=DATABASE\\(\\) AND table_name='employees' AND column_name LIKE 'school%'\")",
+      "Bash(grep -n \"\\\\`position\\\\` varchar\\\\|CREATE TABLE \\\\`positions\\\\`\" employee_information_system.sql)",
+      "Bash(sed '36d;38d' /c/laragon/www/EmployeeInformationSystem/employee_information_system.sql)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot -e \"DROP DATABASE IF EXISTS eis_fresh; CREATE DATABASE eis_fresh\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot eis_fresh)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot eis_fresh -e \"SHOW TABLES LIKE 'school%'; SELECT column_name FROM information_schema.columns WHERE table_schema='eis_fresh' AND table_name='employees' AND column_name LIKE 'school%'\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot -e \"DROP DATABASE IF EXISTS eis_fresh\")",
+      "Bash(C:/laragon/bin/php/php-8.1.10-Win32-vs16-x64/php.exe -r ' *)",
+      "Bash(node school.js)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT school_assignment_id, school_name FROM school_assignments ORDER BY school_name; SELECT COUNT\\(*\\) AS tester_rows FROM employees WHERE last_name='SCHOOLCHECK'\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -N -e \"SELECT employee_id FROM employees WHERE last_name='SCHOOLCHECK' LIMIT 1\")",
+      "Bash(curl -s -c /tmp/sk -b /tmp/sk http://127.0.0.1:8780/modules/auth/login.php)",
+      "Bash(C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe -uroot employee_information_system -e ' *)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT school_assignment_id, school_name, LENGTH\\(school_name\\) len FROM school_assignments WHERE school_name LIKE 'PULA%'\")",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -b /tmp/sk \"http://127.0.0.1:8780/modules/reports/index.php?scope=overall&columns%5B%5D=name&columns%5B%5D=school_assignment\" -o rep.html)",
+      "Bash(curl -s -b /tmp/sk \"http://127.0.0.1:8780/modules/reports/index.php?scope=overall&columns%5B%5D=name&columns%5B%5D=school_assignment\")",
+      "Bash(rm -f school.js vshot.js view-school.png school-page.png rep.html sk stok ex*.txt)"
+    ]
+  }
+}

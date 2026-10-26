@@ -145,6 +145,8 @@ CREATE TABLE `employees` (
   `department_id` int unsigned DEFAULT NULL,
   `position_id` int unsigned DEFAULT NULL,
   `position` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `school_assignment_id` int unsigned DEFAULT NULL,
+  `school_assignment` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Name as at the time of saving, so reports survive a rename',
   `applicant_type` enum('New','Existing') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New',
   `employment_status` enum('Applicant','Active','Inactive','Terminated') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Applicant',
   `employment_status_id` int unsigned DEFAULT NULL,
@@ -158,9 +160,11 @@ CREATE TABLE `employees` (
   KEY `fk_employees_department` (`department_id`),
   KEY `fk_employees_position` (`position_id`),
   KEY `fk_employees_employment_status` (`employment_status_id`),
+  KEY `fk_employees_school_assignment` (`school_assignment_id`),
   CONSTRAINT `fk_employees_department` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_employees_employment_status` FOREIGN KEY (`employment_status_id`) REFERENCES `employment_statuses` (`employment_status_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_employees_position` FOREIGN KEY (`position_id`) REFERENCES `positions` (`position_id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `fk_employees_position` FOREIGN KEY (`position_id`) REFERENCES `positions` (`position_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_employees_school_assignment` FOREIGN KEY (`school_assignment_id`) REFERENCES `school_assignments` (`school_assignment_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -251,6 +255,22 @@ CREATE TABLE `requirement_types` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`requirement_type_id`),
   UNIQUE KEY `uq_requirement_types_name` (`requirement_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `school_assignments`
+--
+
+DROP TABLE IF EXISTS `school_assignments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_assignments` (
+  `school_assignment_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `school_name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`school_assignment_id`),
+  UNIQUE KEY `uq_school_assignments_name` (`school_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

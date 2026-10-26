@@ -134,6 +134,7 @@ require __DIR__ . '/../../includes/header.php';
         <table class="table table-sm table-borderless mb-4">
             <tr><td class="text-muted" style="width:170px">Department</td><td><?= e($emp['department_name'] ?? 'Unassigned') ?></td></tr>
             <tr><td class="text-muted">Position</td><td><?= e($emp['position'] ?? '—') ?></td></tr>
+            <tr><td class="text-muted">School Assignment</td><td><?= e($emp['school_assignment'] ?? '—') ?></td></tr>
             <tr><td class="text-muted">Applicant Type</td><td><?= e($emp['applicant_type']) ?></td></tr>
             <tr><td class="text-muted">Employment Status</td><td><?= e($emp['appointment_status'] ?? '—') ?></td></tr>
             <tr><td class="text-muted">Record Status</td><td><?= e($emp['employment_status']) ?></td></tr>
