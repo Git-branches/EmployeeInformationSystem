@@ -36,7 +36,11 @@
       "Bash(grep \"INSERT INTO \\\\`departments\\\\`\\\\|INSERT INTO \\\\`users\\\\`\" build/www/employee_information_system.sql)",
       "Bash(node v140.js)",
       "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot -e \"DROP DATABASE IF EXISTS eis_v140; DROP DATABASE IF EXISTS eis_old13\")",
-      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT COUNT\\(*\\) AS employees FROM employees; SELECT COUNT\\(*\\) AS schools FROM school_assignments\")"
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT COUNT\\(*\\) AS employees FROM employees; SELECT COUNT\\(*\\) AS schools FROM school_assignments\")",
+      "Bash(\"C:/laragon/bin/php/php-8.1.10-Win32-vs16-x64/php.exe\" cleanup.php)",
+      "Bash(grep \"INSERT INTO \\\\`departments\\\\`\" employee_information_system.sql)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe\" -uroot employee_information_system -e \"SELECT department_id, department_name FROM departments\")",
+      "Bash(node clean.js)"
     ]
   }
 }
